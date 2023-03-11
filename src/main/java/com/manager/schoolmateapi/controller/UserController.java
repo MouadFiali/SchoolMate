@@ -35,6 +35,7 @@ public class UserController {
 	
 	@GetMapping("/users")
 	public Iterable<User> getAllUsers() {
+		System.out.println("Received a request");
 		return userService.getAllUsers();
 	}
 }
