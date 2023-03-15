@@ -12,9 +12,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.geo.Point;
 import org.springframework.data.geo.Polygon;
 
-import com.manager.schoolmateapi.dto.schoolzone.CreateSchoolZoneDto;
-import com.manager.schoolmateapi.dto.schoolzone.EditSchoolZoneDto;
-import com.manager.schoolmateapi.model.SchoolZone;
+import com.manager.schoolmateapi.schoolzones.SchoolZone;
+import com.manager.schoolmateapi.schoolzones.dto.CreateSchoolZoneDto;
+import com.manager.schoolmateapi.schoolzones.dto.EditSchoolZoneDto;
 
 @Mapper(componentModel = "spring")
 public interface DtoMapper {

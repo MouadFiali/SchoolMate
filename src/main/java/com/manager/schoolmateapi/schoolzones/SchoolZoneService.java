@@ -1,4 +1,4 @@
-package com.manager.schoolmateapi.service;
+package com.manager.schoolmateapi.schoolzones;
 
 import java.util.function.Supplier;
 
@@ -7,11 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.manager.schoolmateapi.dto.schoolzone.CreateSchoolZoneDto;
-import com.manager.schoolmateapi.dto.schoolzone.EditSchoolZoneDto;
 import com.manager.schoolmateapi.mappers.DtoMapper;
-import com.manager.schoolmateapi.model.SchoolZone;
-import com.manager.schoolmateapi.repository.SchoolZoneRepository;
+import com.manager.schoolmateapi.schoolzones.dto.CreateSchoolZoneDto;
+import com.manager.schoolmateapi.schoolzones.dto.EditSchoolZoneDto;
 
 @Service
 public class SchoolZoneService {

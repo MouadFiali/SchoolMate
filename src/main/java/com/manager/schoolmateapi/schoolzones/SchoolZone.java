@@ -1,4 +1,4 @@
-package com.manager.schoolmateapi.model;
+package com.manager.schoolmateapi.schoolzones;
 
 import org.springframework.data.geo.Polygon;
 

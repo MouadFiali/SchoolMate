@@ -1,4 +1,4 @@
-package com.manager.schoolmateapi.controller;
+package com.manager.schoolmateapi.schoolzones;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import com.manager.schoolmateapi.dto.schoolzone.CreateSchoolZoneDto;
-import com.manager.schoolmateapi.dto.schoolzone.EditSchoolZoneDto;
-import com.manager.schoolmateapi.model.SchoolZone;
-import com.manager.schoolmateapi.service.SchoolZoneService;
+
+import com.manager.schoolmateapi.schoolzones.dto.CreateSchoolZoneDto;
+import com.manager.schoolmateapi.schoolzones.dto.EditSchoolZoneDto;
 import com.manager.schoolmateapi.utils.MessageResponse;
 
 import jakarta.validation.Valid;

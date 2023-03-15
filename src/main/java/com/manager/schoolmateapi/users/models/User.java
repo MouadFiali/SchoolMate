@@ -1,6 +1,6 @@
-package com.manager.schoolmateapi.model;
+package com.manager.schoolmateapi.users.models;
 
-import com.manager.schoolmateapi.enumerations.UserRole;
+import com.manager.schoolmateapi.users.enumerations.UserRole;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,27 +17,27 @@ import lombok.Data;
 @Table(name = "users")
 public class User {
 	@Id
-	@Column(name="user_id")
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name = "user_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	@Column(name="first_name")
+
+	@Column(name = "first_name")
 	private String firstName;
-	
-	@Column(name="last_name")
+
+	@Column(name = "last_name")
 	private String lastName;
-	
-	@Column(name="email")
+
+	@Column(name = "email")
 	private String email;
-	
-	@Column(name="password")
+
+	@Column(name = "password")
 	private String password;
-	
-	@Column(name="role")
+
+	@Column(name = "role")
 	@Enumerated(EnumType.ORDINAL)
 	private UserRole role;
-	
-	@Column(name="is_active")
+
+	@Column(name = "is_active")
 	private boolean isActive;
 
 	public Long getId() {

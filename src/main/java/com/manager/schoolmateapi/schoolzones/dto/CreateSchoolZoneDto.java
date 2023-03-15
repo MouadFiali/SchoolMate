@@ -1,4 +1,4 @@
-package com.manager.schoolmateapi.dto.schoolzone;
+package com.manager.schoolmateapi.schoolzones.dto;
 
 import java.util.List;
 import jakarta.validation.constraints.NotBlank;
