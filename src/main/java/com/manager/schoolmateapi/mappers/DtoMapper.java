@@ -22,12 +22,14 @@ public interface DtoMapper {
   @Mapping(source = "geometry", target = "geometry", qualifiedByName = "listToPolygon")
   @Mapping(target = "id", ignore = true)
   SchoolZone createDtoToSchoolZone(CreateSchoolZoneDto createSchoolZoneDto);
-
+  
+  
+  
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
   @Mapping(source = "geometry", target = "geometry", qualifiedByName = "listToPolygon")
   @Mapping(target = "id", ignore = true)
   void updateSchoolZoneFromDto(EditSchoolZoneDto editSchoolZoneDto, @MappingTarget SchoolZone schoolZone);
-
+ 
   @Named("listToPolygon")
   public static Polygon listToPolygon(List<List<Double>> geometry) {
     List<Point> points = geometry.stream().map(coords -> {
@@ -35,4 +37,6 @@ public interface DtoMapper {
     }).collect(Collectors.toList());
     return new Polygon(points);
   }
+  
+  
 }

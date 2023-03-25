@@ -1,4 +1,6 @@
 package com.manager.schoolmateapi.alerts.dto;
+import org.springframework.data.geo.Point;
+
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,9 +17,5 @@ public class CreateAlertDto {
     private AlertType type;
 
     @NotNull
-    private Double latitude;
-
-    @NotNull
-    private Double longitude;
-
+    private Point coordinates;
 }
