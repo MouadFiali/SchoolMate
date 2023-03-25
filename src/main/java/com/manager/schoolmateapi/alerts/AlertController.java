@@ -48,7 +48,7 @@ public class AlertController {
     @DeleteMapping("/alerts/{id}")
     MessageResponse deleteAlert(@PathVariable("id") Long id){
         alertService.deleteAlert(id);
-        return new MessageResponse("Alert deleted successfully")
+        return new MessageResponse("Alert deleted successfully");
     }
     
 
