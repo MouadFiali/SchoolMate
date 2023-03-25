@@ -1,4 +1,4 @@
-package com.manager.schoolmateapi.users.dto;
+package com.manager.schoolmateapi.alerts.dto;
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
