@@ -2,6 +2,7 @@ package com.manager.schoolmateapi.alerts;
 
 import org.springframework.data.geo.Point;
 
+import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 import com.manager.schoolmateapi.users.models.User;
 
@@ -46,4 +47,7 @@ public class Alert {
 
     @Column(nullable = false)
     private Point coordinates;
+
+    @Column(nullable = false)
+    private AlertStatus status;
 }

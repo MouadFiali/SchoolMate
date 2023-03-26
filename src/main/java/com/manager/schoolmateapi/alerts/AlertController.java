@@ -44,6 +44,18 @@ public class AlertController {
             return alertService.editAlert(id, editAlertDto);
         }
 
+        
+    @PatchMapping("/alerts/{id}/cancel")
+    Alert cancelAlert(@PathVariable("id") Long id) throws Exception{
+         return alertService.cancelAlert(id);
+    }
+
+    @PatchMapping("/alerts/{id}/confirm")
+    Alert confirmAlert(@PathVariable("id") Long id) throws Exception{
+         return alertService.confirmAlert(id);
+        }
+    
+
     @DeleteMapping("/alerts/{id}")
     MessageResponse deleteAlert(@PathVariable("id") Long id){
         alertService.deleteAlert(id);

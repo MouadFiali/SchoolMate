@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.manager.schoolmateapi.alerts.dto.CreateAlertDto;
 import com.manager.schoolmateapi.alerts.dto.EditAlertDto;
+import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.mappers.AMapper;
 
 @Service
@@ -47,4 +48,42 @@ public class AlertService {
      public void deleteAlert(Long id){
         alertRepository.delete( alertRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER));
      }
+       
+    public Alert cancelAlert(Long id) throws Exception {
+      Alert alert = getAlertById(id);
+      
+      if (alert == null) {
+          try {
+            throw new Exception("Alert not found with id: " + id);
+         } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+      }
+      
+      if (alert.getStatus() == AlertStatus.CANCELLED) {
+          throw new Exception("Alert is already cancelled");
+      }
+      
+      alert.setStatus(AlertStatus.CANCELLED);
+      
+      return alertRepository.save(alert);
+  }
+  
+  public Alert confirmAlert(Long id) throws Exception {
+      Alert alert = getAlertById(id);
+      
+      if (alert == null) {
+          throw new Exception("Alert not found with id: " + id);
+      }
+      
+      if (alert.getStatus() == AlertStatus.CONFIRMED) {
+          throw new Exception("Alert is already confirmed");
+      }
+      
+      alert.setStatus(AlertStatus.CONFIRMED);
+      
+      return alertRepository.save(alert);
+  }
 }
+
