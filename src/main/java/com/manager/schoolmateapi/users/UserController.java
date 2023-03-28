@@ -1,6 +1,5 @@
 package com.manager.schoolmateapi.users;
 
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +22,9 @@ public class UserController {
 
 	@GetMapping("/user/{id}")
 	public User getUser(@PathVariable("id") final Long id) {
-		Optional<User> user = userService.getUser(id);
-		if (user.isPresent()) {
-			return user.get();
-		} else {
-			return null;
-		}
+		User user = userService.getUser(id);
+		return user;
+		
 	}
 
 	@GetMapping("/users")
