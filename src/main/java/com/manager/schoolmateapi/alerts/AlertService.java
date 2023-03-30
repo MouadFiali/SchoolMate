@@ -34,6 +34,7 @@ public class AlertService {
      }
 
      public Alert addAlert(CreateAlertDto createAlertDto ){
+      
         return alertRepository.save(dtoMapper.createDtoToAlert(createAlertDto));
      }
 
@@ -75,6 +76,7 @@ public class AlertService {
       
       if (alert == null) {
           throw new Exception("Alert not found with id: " + id);
+         // return new ResponseStatusException(Htt )
       }
       
       if (alert.getStatus() == AlertStatus.CONFIRMED) {

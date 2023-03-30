@@ -27,6 +27,7 @@ public interface AMapper {
      @Mapping(source = "coordinates", target = "coordinates", qualifiedByName = "ListToPoint")
      @Mapping(target = "id", ignore = true)
      @Mapping(target="user", ignore= true)
+     @Mapping(target="status", ignore= true)
     void updateAlertFromDto(EditAlertDto editAlertDto, @MappingTarget Alert alert);
 
     @Named("listToPoint")
