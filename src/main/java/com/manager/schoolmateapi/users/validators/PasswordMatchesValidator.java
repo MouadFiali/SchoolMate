@@ -9,24 +9,30 @@ import jakarta.validation.ConstraintValidatorContext;
 public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, Object> {
 
     private String passwordFieldName;
+    private String passwordConfirmationFieldName;
 
     @Override
     public void initialize(PasswordMatches constraintAnnotation) {
-        passwordFieldName = constraintAnnotation.passwordField();
+        passwordFieldName = constraintAnnotation.password();
+        passwordConfirmationFieldName = constraintAnnotation.passwordConfirmation();
     }
 
     @Override
-    public boolean isValid(Object value, ConstraintValidatorContext context) {
-        BeanWrapperImpl beanWrapper = new BeanWrapperImpl(value);
-        String password = (String) beanWrapper.getPropertyValue(passwordFieldName);
-        String confirmPassword = (String) value;
-        if (password != null && password.equals(confirmPassword)) {
-            return true;
+    public boolean isValid(Object bean, ConstraintValidatorContext context) {
+        BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
+
+        String password = (String) wrapper.getPropertyValue(passwordFieldName);
+        String confirm = (String) wrapper.getPropertyValue(passwordConfirmationFieldName);
+        
+        System.out.println("pass: " + password + " -- " + "conf: " + confirm);
+        boolean isValid = true;
+        if (password == null || confirm == null || !password.equals(confirm)) {
+            isValid = false;
         }
-        context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
-                .addPropertyNode(passwordFieldName)
-                .addConstraintViolation();
-        return false;
+        context.disableDefaultConstraintViolation(); // Disable the default validation message
+        context.buildConstraintViolationWithTemplate("Passwords do not match") // Add a custom message
+                .addPropertyNode(passwordConfirmationFieldName) // Add the invalid field
+                .addConstraintViolation(); // Add the message to the context
+        return isValid;
     }
 }
