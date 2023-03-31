@@ -24,7 +24,6 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
         String password = (String) wrapper.getPropertyValue(passwordFieldName);
         String confirm = (String) wrapper.getPropertyValue(passwordConfirmationFieldName);
         
-        System.out.println("pass: " + password + " -- " + "conf: " + confirm);
         boolean isValid = true;
         if (password == null || confirm == null || !password.equals(confirm)) {
             isValid = false;
