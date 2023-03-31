@@ -45,7 +45,7 @@ public class UserController {
 
 	@RequestMapping(value="/users", method = RequestMethod.GET)
 	ResponseEntity<?> getUserByEmail(@RequestParam(value = "email", required = false) String email){
-		if(email.isBlank()){
+		if(email != null){
 			User user = userService.getUserByEmail(email);
 			return ResponseEntity.ok(user);
 		} else {
