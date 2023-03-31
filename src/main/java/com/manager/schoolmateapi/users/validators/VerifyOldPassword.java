@@ -10,10 +10,9 @@ import jakarta.validation.Payload;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = OldPasswordValidator.class)
+@Constraint(validatedBy = VerifyOldPasswordValidator.class)
 public @interface VerifyOldPassword {
-    String message() default "Incorrect password";
+    String message() default "Incorrect current password";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
-    String passwordField();
 }

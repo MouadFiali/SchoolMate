@@ -1,6 +1,7 @@
 package com.manager.schoolmateapi.users.dto;
 
 import com.manager.schoolmateapi.users.validators.PasswordMatches;
+import com.manager.schoolmateapi.users.validators.VerifyOldPassword;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.Pattern;
 public class EditPasswordDto {
     
     @NotBlank
+    @VerifyOldPassword
     private String oldPassword;
 
     @NotBlank(message = "The password is required")

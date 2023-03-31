@@ -1,5 +1,7 @@
 package com.manager.schoolmateapi.users.models;
 
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 
 import jakarta.persistence.Column;
@@ -43,4 +45,9 @@ public class User {
 
 	@Column(name = "is_active", nullable = false)
 	private boolean isActive;
+
+	//Crypt password before saving
+	public void setPassword(String password){
+		this.password = BCrypt.hashpw(password, BCrypt.gensalt());
+	}
 }
