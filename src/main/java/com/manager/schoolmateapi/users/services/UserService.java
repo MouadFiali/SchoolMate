@@ -45,7 +45,9 @@ public class UserService {
 	}
 
 	public User addUser(CreateUserDto createUserDto){
-		return userRepository.save(userDtoMapper.createUserDtoToUser(createUserDto));
+		User user = userDtoMapper.createUserDtoToUser(createUserDto);
+		user.setActive(true);
+		return userRepository.save(user);
 	}
 
 	public User editUser(Long id, EditUserDto editUserZoneDto) {

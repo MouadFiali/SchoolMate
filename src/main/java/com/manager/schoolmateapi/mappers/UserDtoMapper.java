@@ -14,21 +14,18 @@ import com.manager.schoolmateapi.users.models.User;
 @Mapper(componentModel = "spring")
 public interface UserDtoMapper {
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "role", ignore = true)
     @Mapping(target = "active", ignore = true)
     User createUserDtoToUser(CreateUserDto createUserDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "role", ignore = true)
-    @Mapping(target = "active", ignore = true)
     void updateUserFromDto(EditUserDto editUserDto, @MappingTarget User user);
     
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "email", ignore = true)

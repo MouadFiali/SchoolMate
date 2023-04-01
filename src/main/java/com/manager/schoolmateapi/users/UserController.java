@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.manager.schoolmateapi.users.dto.CreateUserDto;
 import com.manager.schoolmateapi.users.dto.EditPasswordDto;
 import com.manager.schoolmateapi.users.dto.EditUserDto;
+import com.manager.schoolmateapi.users.enumerations.UserRole;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
 import com.manager.schoolmateapi.users.services.UserService;
@@ -35,6 +36,9 @@ public class UserController {
 	@PostMapping("/users")
 	@ResponseStatus(HttpStatus.CREATED)
 	User addUser(@Valid @RequestBody CreateUserDto createUserDto) {
+		if(createUserDto.getRole()==null){
+			createUserDto.setRole(UserRole.STUDENT);
+		}
 		return userService.addUser(createUserDto);
 	}
 
