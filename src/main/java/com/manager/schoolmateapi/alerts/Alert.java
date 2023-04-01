@@ -27,6 +27,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "alerts")
 public class Alert {
+    private static final AlertStatus PENDING = null;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,5 +51,5 @@ public class Alert {
     private Point coordinates;
 
     @Column(nullable = false)
-    private AlertStatus status;
+    private AlertStatus status = PENDING ;
 }

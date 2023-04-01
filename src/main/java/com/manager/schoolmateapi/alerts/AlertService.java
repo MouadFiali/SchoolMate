@@ -34,7 +34,7 @@ public class AlertService {
      }
 
      public Alert addAlert(CreateAlertDto createAlertDto ){
-      
+
         return alertRepository.save(dtoMapper.createDtoToAlert(createAlertDto));
      }
 
@@ -50,42 +50,42 @@ public class AlertService {
         alertRepository.delete( alertRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER));
      }
        
-    public Alert cancelAlert(Long id) throws Exception {
+    public Alert cancelAlert(Long id)  {
       Alert alert = getAlertById(id);
-      
-      if (alert == null) {
-          try {
-            throw new Exception("Alert not found with id: " + id);
-         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         }
+      if (alert == null) {   
+           // throw new Exception("Alert not found with id: " + id);
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND);     
       }
       
       if (alert.getStatus() == AlertStatus.CANCELLED) {
-          throw new Exception("Alert is already cancelled");
+          //throw new Exception("Alert is already cancelled");
+           throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
       }
       
       alert.setStatus(AlertStatus.CANCELLED);
       
-      return alertRepository.save(alert);
-  }
+       return alertRepository.save(alert);
+       
   
-  public Alert confirmAlert(Long id) throws Exception {
+    }
+
+  public Alert confirmAlert(Long id) {
       Alert alert = getAlertById(id);
       
       if (alert == null) {
-          throw new Exception("Alert not found with id: " + id);
-         // return new ResponseStatusException(Htt )
+         // throw new Exception("Alert not found with id: " + id);
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND );
       }
       
       if (alert.getStatus() == AlertStatus.CONFIRMED) {
-          throw new Exception("Alert is already confirmed");
+          //throw new Exception("Alert is already confirmed");
+          throw new ResponseStatusException(HttpStatus.ALREADY_REPORTED);
       }
       
       alert.setStatus(AlertStatus.CONFIRMED);
       
       return alertRepository.save(alert);
+      
   }
 }
 
