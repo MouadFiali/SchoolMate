@@ -15,12 +15,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
@@ -28,6 +29,10 @@ import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.documents.repositories.DocumentTagsRepository;
 import com.manager.schoolmateapi.documents.repositories.DocumentsRepository;
+import com.manager.schoolmateapi.users.UserRepository;
+import com.manager.schoolmateapi.users.enumerations.UserRole;
+import com.manager.schoolmateapi.users.models.MyUserDetails;
+import com.manager.schoolmateapi.users.models.User;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -47,12 +52,18 @@ public class DocumentsControllerTest {
   @Autowired
   DocumentTagsRepository documentTagsRepository;
 
+  @Autowired
+  UserRepository userRepository;
+
+  MyUserDetails testUser;
+
   List<Long> createdTagsIds;
 
   @BeforeEach
   void setup() {
     documentsRepository.deleteAll();
     documentTagsRepository.deleteAll();
+    // Create some tags
     Iterable<DocumentTag> tags = documentTagsRepository.saveAll(
         List.of(
             DocumentTag.builder().name("Théorie des graphes").build(),
@@ -62,6 +73,18 @@ public class DocumentsControllerTest {
 
     createdTagsIds = StreamSupport.stream(tags.spliterator(), false)
         .map(tag -> tag.getId()).toList();
+
+    // Create a test user
+    User user = new User();
+    user.setFirstName("John");
+    user.setLastName("Smith");
+    user.setRole(UserRole.STUDENT);
+    user.setPassword("password");
+    user.setEmail("john.smith@gmail.com");
+
+    // Save the test user
+    User newUser = userRepository.save(user);
+    testUser = new MyUserDetails(newUser);
   }
 
   @Test
@@ -83,7 +106,8 @@ public class DocumentsControllerTest {
         .perform(
             multipart("/documents")
                 .file(file)
-                .file("data", objectMapper.writeValueAsBytes(data)))
+                .file("data", objectMapper.writeValueAsBytes(data))
+                .with(user(testUser)))
         .andExpect(status().isCreated())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.name").value(data.getName()))
@@ -110,7 +134,8 @@ public class DocumentsControllerTest {
                 .build()));
 
     mockMvc
-        .perform(get("/documents"))
+        .perform(get("/documents")
+            .with(user(testUser)))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.length").value(2));
@@ -128,7 +153,8 @@ public class DocumentsControllerTest {
 
     mockMvc
         .perform(
-            get(String.format("/documents/%d", doc.getId())))
+            get(String.format("/documents/%d", doc.getId()))
+                .with(user(testUser)))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.name").value(doc.getName()))
@@ -149,7 +175,8 @@ public class DocumentsControllerTest {
 
     mockMvc
         .perform(
-            get(String.format("/documents/%d", doc.getId() + 1)))
+            get(String.format("/documents/%d", doc.getId() + 1))
+                .with(user(testUser)))
         .andExpect(status().isNotFound())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").isString());
@@ -175,7 +202,8 @@ public class DocumentsControllerTest {
         .perform(
             patch(String.format("/documents/%d", doc.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(editData)))
+                .content(objectMapper.writeValueAsString(editData))
+                .with(user(testUser)))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.name").value(editData.getName()))
