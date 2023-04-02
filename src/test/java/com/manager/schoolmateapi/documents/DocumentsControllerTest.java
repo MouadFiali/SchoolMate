@@ -102,11 +102,17 @@ public class DocumentsControllerTest {
         .tags(createdTagsIds)
         .build();
 
+    MockMultipartFile jsonData = new MockMultipartFile(
+        "data",
+        null,
+        MediaType.APPLICATION_JSON_VALUE,
+        objectMapper.writeValueAsBytes(data));
+
     mockMvc
         .perform(
             multipart("/documents")
                 .file(file)
-                .file("data", objectMapper.writeValueAsBytes(data))
+                .file(jsonData)
                 .with(user(testUser)))
         .andExpect(status().isCreated())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
