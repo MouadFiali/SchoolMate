@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.manager.schoolmateapi.users.models.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +49,10 @@ public class Document {
   @CreationTimestamp
   @Column(nullable = false)
   private Date uploadedAt;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "documents_document_tags", joinColumns = @JoinColumn(name = "document_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))

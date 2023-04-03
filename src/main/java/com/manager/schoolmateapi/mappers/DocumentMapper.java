@@ -27,6 +27,7 @@ public abstract class DocumentMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "file", ignore = true)
   @Mapping(target = "uploadedAt", ignore = true)
+  @Mapping(target = "user", ignore = true)
   public abstract Document createDtoToDocument(CreateDocumentDto createDocumentDto);
 
   @Named("tagsIdsListToTags")

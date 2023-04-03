@@ -1,7 +1,10 @@
 package com.manager.schoolmateapi.users.models;
 
+import java.util.Set;
+
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 
 import jakarta.persistence.Column;
@@ -11,6 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,8 +50,11 @@ public class User {
 	@Column(name = "is_active", nullable = false)
 	private boolean isActive;
 
-	//Crypt password before saving
-	public void setPassword(String password){
+	@OneToMany(mappedBy = "user")
+	private Set<Document> documents;
+
+	// Crypt password before saving
+	public void setPassword(String password) {
 		this.password = BCrypt.hashpw(password, BCrypt.gensalt());
 	}
 }
