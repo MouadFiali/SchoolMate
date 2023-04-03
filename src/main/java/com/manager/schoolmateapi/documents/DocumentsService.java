@@ -32,7 +32,7 @@ public class DocumentsService {
     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
   };
 
-  public Document getDocumentById(Long documentId, User user) {
+  public Document getDocumentById(long documentId, User user) {
     return documentsRepository.findByIdAndUser(documentId, user).orElseThrow(NOT_FOUND_HANDLER);
   }
 
