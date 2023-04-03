@@ -1,10 +1,13 @@
 package com.manager.schoolmateapi.documents.models;
 
+import java.sql.Types;
 import java.util.Date;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.manager.schoolmateapi.users.models.User;
 
 import jakarta.persistence.Column;
@@ -43,7 +46,9 @@ public class Document {
   private boolean shared = false;
 
   @Lob
+  @JdbcTypeCode(Types.BLOB)
   @Column(nullable = false)
+  @JsonIgnore
   private byte[] file;
 
   @CreationTimestamp
@@ -52,6 +57,7 @@ public class Document {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
+  @JsonIgnore
   private User user;
 
   @ManyToMany(fetch = FetchType.LAZY)
