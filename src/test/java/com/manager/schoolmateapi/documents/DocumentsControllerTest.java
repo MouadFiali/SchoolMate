@@ -134,12 +134,14 @@ public class DocumentsControllerTest {
 								.name("Résumé TG")
 								.shared(false)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+								.user(testUser.getUser())
 								.build(),
 						Document
 								.builder()
 								.name("Java Cheatsheet (LOL)")
 								.shared(false)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+								.user(testUser.getUser())
 								.build()));
 
 		mockMvc
@@ -147,7 +149,7 @@ public class DocumentsControllerTest {
 						.with(user(testUser)))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.length").value(2));
+				.andExpect(jsonPath("$.[*]").value(Matchers.hasSize(2)));
 	}
 
 	@Test
