@@ -56,4 +56,8 @@ public class DocumentsService {
     return newDocument;
   }
 
+  public Iterable<Document> getAllUserDocuments(User user) {
+    return documentsRepository.findByUser(user);
+  }
+
 }
