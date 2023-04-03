@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,10 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
 import com.manager.schoolmateapi.documents.models.Document;
@@ -121,6 +117,8 @@ public class DocumentsControllerTest {
 								.with(user(testUser)))
 				.andExpect(status().isCreated())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(
+						jsonPath("$.id").value(Matchers.anyOf(Matchers.instanceOf(Integer.class), Matchers.instanceOf(long.class))))
 				.andExpect(jsonPath("$.name").value(data.getName()))
 				.andExpect(jsonPath("$.shared").value(data.getShared()))
 				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(data.getTags().size())))
