@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -23,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
 import com.manager.schoolmateapi.documents.models.Document;
@@ -108,7 +111,7 @@ public class DocumentsControllerTest {
 				MediaType.APPLICATION_JSON_VALUE,
 				objectMapper.writeValueAsBytes(data));
 
-		mockMvc
+		MvcResult result = mockMvc
 				.perform(
 						multipart("/documents")
 								.file(file)
@@ -122,6 +125,11 @@ public class DocumentsControllerTest {
 				.andExpect(jsonPath("$.shared").value(data.getShared()))
 				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(data.getTags().size())))
 				.andReturn();
+
+		long id = ((Number) JsonPath.parse(result.getResponse().getContentAsString()).read("$.id")).longValue();
+		Optional<Document> newDoc = documentsRepository.findById(id);
+		assertEquals(newDoc.isPresent(), true);
+
 	}
 
 	@Test
