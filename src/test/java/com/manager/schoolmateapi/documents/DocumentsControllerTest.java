@@ -160,6 +160,7 @@ public class DocumentsControllerTest {
 						.name("Résumé TG")
 						.shared(false)
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.user(testUser.getUser())
 						.build());
 
 		mockMvc
@@ -189,8 +190,7 @@ public class DocumentsControllerTest {
 						get(String.format("/documents/%d", doc.getId() + 1))
 								.with(user(testUser)))
 				.andExpect(status().isNotFound())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.message").isString());
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
 	}
 
 	@Test
