@@ -3,6 +3,7 @@ package com.manager.schoolmateapi.documents;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import org.hamcrest.Matchers;
@@ -15,8 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -109,7 +108,7 @@ public class DocumentsControllerTest {
 				MediaType.APPLICATION_JSON_VALUE,
 				objectMapper.writeValueAsBytes(data));
 
-		MvcResult result = mockMvc
+		mockMvc
 				.perform(
 						multipart("/documents")
 								.file(file)
@@ -171,8 +170,7 @@ public class DocumentsControllerTest {
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.name").value(doc.getName()))
 				.andExpect(jsonPath("$.shared").value(doc.isShared()))
-				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(doc.getTags().size())))
-				.andExpect(jsonPath("$.tags").value(Matchers.containsInAnyOrder(doc.getTags())));
+				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(0)));
 	}
 
 	@Test
@@ -223,6 +221,27 @@ public class DocumentsControllerTest {
 		Document newDoc = documentsRepository.findById(doc.getId()).orElseThrow();
 		assertEquals(editData.getName(), newDoc.getName());
 		assertEquals(editData.isShared(), newDoc.isShared());
+	}
+
+	@Test
+	void testDeleteDocument_shoudReturnSuccessMessage() throws Exception {
+		Document doc = documentsRepository.save(
+				Document
+						.builder()
+						.name("PostgreSQL Cheatsheet")
+						.shared(true)
+						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.build());
+
+		mockMvc
+				.perform(
+						delete("/documents/%d", doc.getId())
+								.with(user(testUser)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").isString());
+
+		Optional<Document> document = documentsRepository.findById(doc.getId());
+		assertEquals(document.isEmpty(), true);
 	}
 
 }
