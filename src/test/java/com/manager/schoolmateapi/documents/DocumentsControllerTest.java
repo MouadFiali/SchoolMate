@@ -257,7 +257,7 @@ public class DocumentsControllerTest {
 
 		mockMvc
 				.perform(
-						delete("/documents/%d", doc.getId())
+						delete(String.format("/documents/%d", doc.getId()))
 								.with(user(testUser)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").isString());
