@@ -38,7 +38,6 @@ public class DocumentTag {
 
   @CreationTimestamp
   @Column(nullable = false)
-  @JsonIgnore
   private Date createdAt;
 
   @ManyToMany(mappedBy = "tags")
