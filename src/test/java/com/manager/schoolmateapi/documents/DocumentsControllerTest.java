@@ -132,7 +132,7 @@ public class DocumentsControllerTest {
 
 		long id = ((Number) JsonPath.parse(result.getResponse().getContentAsString()).read("$.id")).longValue();
 		Optional<Document> newDoc = documentsRepository.findById(id);
-		assertEquals(newDoc.isPresent(), true);
+		assertTrue(newDoc.isPresent());
 		assertNotNull(newDoc.get().getUser());
 		assertEquals(newDoc.get().getUser().getId(), testUser.getUser().getId());
 	}
@@ -254,7 +254,7 @@ public class DocumentsControllerTest {
 				.andExpect(jsonPath("$.message").isString());
 
 		Optional<Document> document = documentsRepository.findById(doc.getId());
-		assertEquals(document.isEmpty(), true);
+		assertTrue(document.isEmpty());
 	}
 
 	@Test
@@ -293,7 +293,7 @@ public class DocumentsControllerTest {
 
 		long id = ((Number) JsonPath.parse(result.getResponse().getContentAsString()).read("$.id")).longValue();
 		Optional<DocumentTag> newTag = documentTagsRepository.findById(id);
-		assertEquals(newTag.isPresent(), true);
+		assertTrue(newTag.isPresent());
 		assertNotNull(newTag.get().getUser());
 		assertEquals(newTag.get().getUser().getId(), testUser.getUser().getId());
 	}
