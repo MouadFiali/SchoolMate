@@ -2,6 +2,7 @@ package com.manager.schoolmateapi.documents;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -17,8 +18,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -314,8 +317,9 @@ public class DocumentsControllerTest {
 				DocumentTag.builder().name("Off-Topic").user(testUser.getUser()).build());
 
 		// List that contains tags owned by user and not owned by user
-		List<DocumentTag> listOfTags = List.of(
-				DocumentTag.builder().name("DevOps").build()); // Should not be included in response
+		List<DocumentTag> listOfTags = new ArrayList<>(
+				List.of(
+						DocumentTag.builder().name("DevOps").build())); // Should not be included in response
 		listOfTags.addAll(listOfUserTags);
 
 		documentTagsRepository.saveAll(listOfTags);
