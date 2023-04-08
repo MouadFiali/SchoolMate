@@ -4,13 +4,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
+import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
 import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.documents.repositories.DocumentTagsRepository;
@@ -29,6 +33,14 @@ public abstract class DocumentMapper {
   @Mapping(target = "uploadedAt", ignore = true)
   @Mapping(target = "user", ignore = true)
   public abstract Document createDtoToDocument(CreateDocumentDto createDocumentDto);
+
+  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  @Mapping(target = "tags", qualifiedByName = "tagsIdsListToTags")
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "file", ignore = true)
+  @Mapping(target = "uploadedAt", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  public abstract void updateDocumentFromDto(EditDocumentDto editDocumentDto, @MappingTarget Document document);
 
   @Named("tagsIdsListToTags")
   public Set<DocumentTag> map(List<Long> ids) {
