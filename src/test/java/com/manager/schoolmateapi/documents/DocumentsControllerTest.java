@@ -291,7 +291,7 @@ public class DocumentsControllerTest {
 		CreateDocumentTagDto cTagDto = CreateDocumentTagDto.builder().name("PFA").build();
 
 		MvcResult result = mockMvc.perform(
-				post("/documents/tags/")
+				post("/documents/tags")
 						.with(user(testUser)))
 				.andExpect(status().isCreated())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
