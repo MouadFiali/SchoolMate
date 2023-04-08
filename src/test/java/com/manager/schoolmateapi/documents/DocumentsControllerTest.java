@@ -270,7 +270,8 @@ public class DocumentsControllerTest {
 
 		mockMvc
 				.perform(
-						get(String.format("/documents/%d/file", doc.getId())))
+						get(String.format("/documents/%d/file", doc.getId()))
+								.with(user(testUser)))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(content().bytes(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH))));
