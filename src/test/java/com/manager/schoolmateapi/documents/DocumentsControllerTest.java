@@ -206,6 +206,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
+	@Transactional
 	void testDocumentEditDetails_shouldReturnNewDocumentDetails() throws Exception {
 		Document doc = documentsRepository.save(
 				Document
@@ -236,6 +237,9 @@ public class DocumentsControllerTest {
 		Document newDoc = documentsRepository.findById(doc.getId()).orElseThrow();
 		assertEquals(editData.getName(), newDoc.getName());
 		assertEquals(editData.isShared(), newDoc.isShared());
+		assertArrayEquals(
+				newDoc.getTags().stream().map(tag -> tag.getId()).toArray(),
+				doc.getTags().stream().map(tag -> tag.getId()).toArray());
 	}
 
 	@Test
