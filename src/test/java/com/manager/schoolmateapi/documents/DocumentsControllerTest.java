@@ -292,6 +292,8 @@ public class DocumentsControllerTest {
 
 		MvcResult result = mockMvc.perform(
 				post("/documents/tags")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(cTagDto))
 						.with(user(testUser)))
 				.andExpect(status().isCreated())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
