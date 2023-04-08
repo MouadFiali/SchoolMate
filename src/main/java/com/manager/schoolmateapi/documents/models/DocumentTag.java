@@ -4,12 +4,18 @@ import java.util.Date;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.manager.schoolmateapi.users.models.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,8 +38,14 @@ public class DocumentTag {
 
   @CreationTimestamp
   @Column(nullable = false)
+  @JsonIgnore
   private Date createdAt;
 
   @ManyToMany(mappedBy = "tags")
+  @JsonIgnore
   private Set<Document> documents;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
 }

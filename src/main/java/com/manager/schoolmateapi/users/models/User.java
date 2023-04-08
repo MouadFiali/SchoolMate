@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import com.manager.schoolmateapi.documents.models.Document;
+import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 
 import jakarta.persistence.Column;
@@ -52,6 +53,9 @@ public class User {
 
 	@OneToMany(mappedBy = "user")
 	private Set<Document> documents;
+
+	@OneToMany(mappedBy = "user")
+	private Set<DocumentTag> tags;
 
 	// Crypt password before saving
 	public void setPassword(String password) {
