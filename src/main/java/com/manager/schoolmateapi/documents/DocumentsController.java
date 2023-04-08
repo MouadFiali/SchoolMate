@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
 import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
+import com.manager.schoolmateapi.utils.MessageResponse;
 
 @RestController
 @RequestMapping("/documents")
@@ -50,5 +52,11 @@ public class DocumentsController {
   public Document editUserDocument(@AuthenticationPrincipal MyUserDetails userDetails, @PathVariable long id,
       @RequestBody EditDocumentDto editDocumentDto) {
     return documentsService.editUserDocument(id, editDocumentDto, userDetails.getUser());
+  }
+
+  @DeleteMapping("/{id}")
+  public MessageResponse deleteUserDocument(@AuthenticationPrincipal MyUserDetails userDetails, @PathVariable long id) {
+    documentsService.deleteUserDocument(id, userDetails.getUser());
+    return MessageResponse.builder().message("Document deleted successfully").build();
   }
 }

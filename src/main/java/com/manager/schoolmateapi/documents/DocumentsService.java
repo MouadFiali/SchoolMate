@@ -64,6 +64,7 @@ public class DocumentsService {
     return documentsRepository.findByUser(user);
   }
 
+  @Transactional
   public Document editUserDocument(long id, EditDocumentDto editDocumentDto, User user) {
     Document document = documentsRepository.findByIdAndUser(id, user).orElseThrow(NOT_FOUND_HANDLER);
 
@@ -71,6 +72,11 @@ public class DocumentsService {
     documentsRepository.save(document);
 
     return document;
+  }
+
+  public void deleteUserDocument(long id, User user) {
+    documentsRepository.delete(
+        documentsRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER));
   }
 
 }
