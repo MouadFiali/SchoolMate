@@ -193,6 +193,7 @@ public class DocumentsControllerTest {
 						.builder()
 						.name("Résumé TG")
 						.shared(false)
+						.user(testUser.getUser())
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 						.build());
 
@@ -211,6 +212,7 @@ public class DocumentsControllerTest {
 						.builder()
 						.name("Résumé TG")
 						.shared(false)
+						.user(testUser.getUser())
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 						.build());
 
