@@ -6,10 +6,12 @@ import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
+import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
 import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.documents.repositories.DocumentsRepository;
 import com.manager.schoolmateapi.mappers.DocumentMapper;
@@ -32,6 +34,7 @@ public class DocumentsService {
     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
   };
 
+  @Transactional
   public Document getDocumentById(long documentId, User user) {
     return documentsRepository.findByIdAndUser(documentId, user).orElseThrow(NOT_FOUND_HANDLER);
   }
@@ -56,8 +59,18 @@ public class DocumentsService {
     return newDocument;
   }
 
+  @Transactional
   public Iterable<Document> getAllUserDocuments(User user) {
     return documentsRepository.findByUser(user);
+  }
+
+  public Document editUserDocument(long id, EditDocumentDto editDocumentDto, User user) {
+    Document document = documentsRepository.findByIdAndUser(id, user).orElseThrow(NOT_FOUND_HANDLER);
+
+    documentMapper.updateDocumentFromDto(editDocumentDto, document);
+    documentsRepository.save(document);
+
+    return document;
   }
 
 }
