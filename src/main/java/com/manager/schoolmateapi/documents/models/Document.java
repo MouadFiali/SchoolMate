@@ -2,6 +2,7 @@ package com.manager.schoolmateapi.documents.models;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.HashSet;
 
 import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -56,7 +57,8 @@ public class Document {
   @JsonIgnore
   private User user;
 
+  @Builder.Default
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "documents_document_tags", joinColumns = @JoinColumn(name = "document_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
-  private Set<DocumentTag> tags;
+  private Set<DocumentTag> tags = new HashSet<>();
 }
