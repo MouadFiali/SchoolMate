@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,7 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
+import com.manager.schoolmateapi.documents.dto.CreateDocumentTagDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
+import com.manager.schoolmateapi.documents.dto.EditDocumentTagDto;
 import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.documents.repositories.DocumentTagsRepository;
@@ -129,7 +133,8 @@ public class DocumentsControllerTest {
 		long id = ((Number) JsonPath.parse(result.getResponse().getContentAsString()).read("$.id")).longValue();
 		Optional<Document> newDoc = documentsRepository.findById(id);
 		assertEquals(newDoc.isPresent(), true);
-
+		assertNotNull(newDoc.get().getUser());
+		assertEquals(newDoc.get().getUser().getId(), testUser.getUser().getId());
 	}
 
 	@Test
@@ -250,6 +255,153 @@ public class DocumentsControllerTest {
 
 		Optional<Document> document = documentsRepository.findById(doc.getId());
 		assertEquals(document.isEmpty(), true);
+	}
+
+	@Test
+	void testDocumentDownload_shoudReturnFileBytes() throws Exception {
+		Document doc = documentsRepository.save(
+				Document
+						.builder()
+						.name("PostgreSQL Cheatsheet")
+						.shared(true)
+						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.user(testUser.getUser())
+						.build());
+
+		mockMvc
+				.perform(
+						get(String.format("/documents/%d/file", doc.getId())))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_OCTET_STREAM))
+				.andExpect(content().bytes(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH))));
+	}
+
+	@Test
+	void testAddTag_shouldReturnNewTag() throws Exception {
+		CreateDocumentTagDto cTagDto = CreateDocumentTagDto.builder().name("PFA").build();
+
+		MvcResult result = mockMvc.perform(
+				post("/documents/tags/")
+						.with(user(testUser)))
+				.andExpect(status().isCreated())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(
+						jsonPath("$.id").value(Matchers.anyOf(Matchers.instanceOf(Integer.class), Matchers.instanceOf(long.class))))
+				.andExpect(jsonPath("$.name").value(cTagDto.getName()))
+				.andExpect(jsonPath("$.createdAt").isString())
+				.andReturn();
+
+		long id = ((Number) JsonPath.parse(result.getResponse().getContentAsString()).read("$.id")).longValue();
+		Optional<DocumentTag> newTag = documentTagsRepository.findById(id);
+		assertEquals(newTag.isPresent(), true);
+		assertNotNull(newTag.get().getUser());
+		assertEquals(newTag.get().getUser().getId(), testUser.getUser().getId());
+	}
+
+	@Test
+	void testListTags_shouldReturnTags() throws Exception {
+		// List that contains tags owned by user
+		List<DocumentTag> listOfUserTags = List.of(
+				DocumentTag.builder().name("PFE").user(testUser.getUser()).build(),
+				DocumentTag.builder().name("Java Resources").user(testUser.getUser()).build(),
+				DocumentTag.builder().name("Off-Topic").user(testUser.getUser()).build());
+
+		// List that contains tags owned by user and not owned by user
+		List<DocumentTag> listOfTags = List.of(
+				DocumentTag.builder().name("DevOps").build()); // Should not be included in response
+		listOfTags.addAll(listOfUserTags);
+
+		documentTagsRepository.saveAll(listOfTags);
+
+		mockMvc
+				.perform(
+						get("/documents/tags")
+								.with(user(testUser)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.[*]").value(Matchers.hasSize(listOfUserTags.size())))
+				.andExpect(jsonPath("$.[*].name").value(
+						Matchers.containsInAnyOrder(listOfTags.stream().map(tag -> tag.getName()).toArray())))
+				.andExpect(jsonPath("$.[*].createdAt").value(Matchers.instanceOf(String.class)));
+	}
+
+	@Test
+	void testEditTag_shouldReturnNewTag() throws Exception {
+		DocumentTag docTag = DocumentTag.builder()
+				.name("DevOps")
+				.user(testUser.getUser())
+				.build();
+
+		EditDocumentTagDto eTagDto = EditDocumentTagDto.builder().name("DevOps Resources").build();
+
+		mockMvc
+				.perform(
+						post(String.format("/documents/tags/%d", docTag.getId()))
+								.with(user(testUser))
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(objectMapper.writeValueAsString(eTagDto)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(docTag.getId()))
+				.andExpect(jsonPath("$.name").value(eTagDto.getName()))
+				.andExpect(jsonPath("$.createdAt").isString());
+
+		Optional<DocumentTag> newDocTag = documentTagsRepository.findById(docTag.getId());
+		assertTrue(newDocTag.isPresent());
+		assertEquals(newDocTag.get().getName(), eTagDto.getName());
+	}
+
+	@Test
+	void testEditTag_givenWrongId_shouldReturnNotFound() throws Exception {
+		DocumentTag docTag = DocumentTag.builder()
+				.name("DevOps")
+				.user(testUser.getUser())
+				.build();
+
+		EditDocumentTagDto eTagDto = EditDocumentTagDto.builder().name("DevOps Resources").build();
+
+		mockMvc
+				.perform(
+						post(String.format("/documents/tags/%d", docTag.getId() + 1))
+								.with(user(testUser))
+								.content(objectMapper.writeValueAsString(eTagDto))
+								.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+	}
+
+	@Test
+	void testDeleteTag_shouldReturnSuccessMessage() throws Exception {
+		DocumentTag docTag = DocumentTag.builder()
+				.name("Test Driven Development :(")
+				.user(testUser.getUser())
+				.build();
+
+		mockMvc
+				.perform(
+						delete(String.format("/documents/tags/%d", docTag.getId()))
+								.with(user(testUser)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.message").isString());
+
+		Optional<DocumentTag> deletedDocTag = documentTagsRepository.findById(docTag.getId());
+		assertTrue(deletedDocTag.isEmpty());
+	}
+
+	@Test
+	void testDeleteTag_givenWrongId_shouldReturnSuccessMessage() throws Exception {
+		DocumentTag docTag = DocumentTag.builder()
+				.name("Test Driven Development :(")
+				.user(testUser.getUser())
+				.build();
+
+		mockMvc
+				.perform(
+						delete(String.format("/documents/tags/%d", docTag.getId() + 1))
+								.with(user(testUser)))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
 	}
 
 }
