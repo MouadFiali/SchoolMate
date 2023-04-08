@@ -27,7 +27,7 @@ public abstract class DocumentMapper {
   @Autowired
   private DocumentTagsRepository documentTagsRepository;
 
-  @Mapping(target = "tags", qualifiedByName = "tagsIdsListToTags")
+  @Mapping(source = "tags", target = "tags", qualifiedByName = "tagsIdsListToTags")
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "file", ignore = true)
   @Mapping(target = "uploadedAt", ignore = true)
@@ -35,7 +35,7 @@ public abstract class DocumentMapper {
   public abstract Document createDtoToDocument(CreateDocumentDto createDocumentDto);
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  @Mapping(target = "tags", qualifiedByName = "tagsIdsListToTags")
+  @Mapping(source = "tags", target = "tags", qualifiedByName = "tagsIdsListToTags")
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "file", ignore = true)
   @Mapping(target = "uploadedAt", ignore = true)
@@ -44,6 +44,9 @@ public abstract class DocumentMapper {
 
   @Named("tagsIdsListToTags")
   public Set<DocumentTag> map(List<Long> ids) {
+    if (ids == null)
+      return null;
+
     return ids.stream().map(id -> {
       return documentTagsRepository.findById(id).orElseThrow(() -> {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Document tag #%d not found", id));
