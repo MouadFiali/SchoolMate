@@ -73,6 +73,7 @@ public class DocumentsControllerTest {
 	void setup() {
 		documentsRepository.deleteAll();
 		documentTagsRepository.deleteAll();
+		userRepository.deleteAll();
 		// Create some tags
 		Iterable<DocumentTag> tags = documentTagsRepository.saveAll(
 				List.of(
@@ -388,10 +389,11 @@ public class DocumentsControllerTest {
 
 	@Test
 	void testDeleteTag_shouldReturnSuccessMessage() throws Exception {
-		DocumentTag docTag = DocumentTag.builder()
-				.name("Test Driven Development :(")
-				.user(testUser.getUser())
-				.build();
+		DocumentTag docTag = documentTagsRepository.save(
+				DocumentTag.builder()
+						.name("Test Driven Development :(")
+						.user(testUser.getUser())
+						.build());
 
 		mockMvc
 				.perform(
@@ -407,10 +409,11 @@ public class DocumentsControllerTest {
 
 	@Test
 	void testDeleteTag_givenWrongId_shouldReturnSuccessMessage() throws Exception {
-		DocumentTag docTag = DocumentTag.builder()
-				.name("Test Driven Development :(")
-				.user(testUser.getUser())
-				.build();
+		DocumentTag docTag = documentTagsRepository.save(
+				DocumentTag.builder()
+						.name("Test Driven Development :(")
+						.user(testUser.getUser())
+						.build());
 
 		mockMvc
 				.perform(
