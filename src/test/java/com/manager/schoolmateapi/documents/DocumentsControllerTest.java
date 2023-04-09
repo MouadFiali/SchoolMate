@@ -335,7 +335,8 @@ public class DocumentsControllerTest {
 				.andExpect(jsonPath("$.[*]").value(Matchers.hasSize(listOfUserTags.size())))
 				.andExpect(jsonPath("$.[*].name").value(
 						Matchers.containsInAnyOrder(listOfUserTags.stream().map(tag -> tag.getName()).toArray())))
-				.andExpect(jsonPath("$.[*].createdAt").isString());
+				.andExpect(jsonPath("$.[*].createdAt").value(
+						Matchers.everyItem(Matchers.instanceOf(String.class))));
 	}
 
 	@Test
