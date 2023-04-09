@@ -1,8 +1,16 @@
 package com.manager.schoolmateapi.documents;
 
+import java.io.InputStream;
+
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MimeType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +23,18 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.server.ResponseStatusException;
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
+import com.manager.schoolmateapi.documents.dto.CreateDocumentTagDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
+import com.manager.schoolmateapi.documents.dto.EditDocumentTagDto;
 import com.manager.schoolmateapi.documents.models.Document;
+import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.utils.MessageResponse;
+import com.manager.schoolmateapi.utils.StringUtils;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/documents")
@@ -34,7 +48,7 @@ public class DocumentsController {
   public Document uploadNewDocument(
       @AuthenticationPrincipal MyUserDetails userDetails,
       @RequestPart(name = "file", required = true) MultipartFile file,
-      @RequestPart CreateDocumentDto data) {
+      @Valid @RequestPart CreateDocumentDto data) {
     return documentsService.uploadDocumentForUser(userDetails.getUser(), file, data);
   }
 
@@ -50,7 +64,7 @@ public class DocumentsController {
 
   @PatchMapping("/{id}")
   public Document editUserDocument(@AuthenticationPrincipal MyUserDetails userDetails, @PathVariable long id,
-      @RequestBody EditDocumentDto editDocumentDto) {
+      @Valid @RequestBody EditDocumentDto editDocumentDto) {
     return documentsService.editUserDocument(id, editDocumentDto, userDetails.getUser());
   }
 
@@ -58,5 +72,67 @@ public class DocumentsController {
   public MessageResponse deleteUserDocument(@AuthenticationPrincipal MyUserDetails userDetails, @PathVariable long id) {
     documentsService.deleteUserDocument(id, userDetails.getUser());
     return MessageResponse.builder().message("Document deleted successfully").build();
+  }
+
+  @GetMapping("/{id}/file")
+  public ResponseEntity<byte[]> downloadUserDocument(
+      @AuthenticationPrincipal MyUserDetails userDetails,
+      @PathVariable long id) {
+    Document document = documentsService.getDocumentById(id, userDetails.getUser());
+
+    byte[] file = document.getFile();
+
+    // Detect the file mime/type for extension
+    TikaConfig tikaConfig = TikaConfig.getDefaultConfig();
+    Metadata meta = new Metadata();
+    InputStream inputStream = TikaInputStream.get(file, meta);
+    try {
+      org.apache.tika.mime.MediaType mediaType = tikaConfig.getMimeRepository().detect(inputStream, meta);
+      MimeType mimeType = tikaConfig.getMimeRepository().forName(mediaType.toString());
+      String extension = mimeType.getExtension();
+
+      // Return the file bytes
+      return ResponseEntity
+          .ok()
+          .header(HttpHeaders.CONTENT_DISPOSITION,
+              String.format("attachment; filename=\"%s%s\"", StringUtils.slugify(document.getName()), extension))
+          .body(file);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "An error occured while processing your file");
+    }
+  }
+
+  // ------ Document Tags ------ //
+
+  @GetMapping("/tags")
+  public Iterable<DocumentTag> getUserDocumentTags(@AuthenticationPrincipal MyUserDetails userDetails) {
+    return documentsService.getUserDocumentTags(userDetails.getUser());
+  }
+
+  @PostMapping("/tags")
+  @ResponseStatus(HttpStatus.CREATED)
+  public DocumentTag addDocumentTag(
+      @AuthenticationPrincipal MyUserDetails userDetails,
+      @Valid @RequestBody CreateDocumentTagDto createDocumentTagDto) {
+    return documentsService.addDocumentTag(createDocumentTagDto, userDetails.getUser());
+  }
+
+  @PatchMapping("/tags/{id}")
+  public DocumentTag editDocumentTag(
+      @AuthenticationPrincipal MyUserDetails userDetails,
+      @PathVariable long id,
+      @Valid @RequestBody EditDocumentTagDto editDocumentTagDto) {
+    return documentsService.editDocumentTag(id, editDocumentTagDto, userDetails.getUser());
+  }
+
+  @DeleteMapping("/tags/{id}")
+  public MessageResponse deleteDocumentTag(
+      @AuthenticationPrincipal MyUserDetails userDetails,
+      @PathVariable long id) {
+    documentsService.deleteDocumentTag(id, userDetails.getUser());
+    return MessageResponse.builder().message("Document tag deleted successfully").build();
   }
 }
