@@ -10,6 +10,7 @@ import com.manager.schoolmateapi.users.models.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,11 +41,12 @@ public class DocumentTag {
   @Column(nullable = false)
   private Date createdAt;
 
-  @ManyToMany(mappedBy = "tags")
+  @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
   @JsonIgnore
   private Set<Document> documents;
 
   @ManyToOne
   @JoinColumn(name = "user_id")
+  @JsonIgnore
   private User user;
 }
