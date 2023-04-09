@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
+import com.manager.schoolmateapi.documents.dto.CreateDocumentTagDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
+import com.manager.schoolmateapi.documents.dto.EditDocumentTagDto;
 import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.documents.repositories.DocumentTagsRepository;
@@ -40,7 +42,22 @@ public abstract class DocumentMapper {
   @Mapping(target = "file", ignore = true)
   @Mapping(target = "uploadedAt", ignore = true)
   @Mapping(target = "user", ignore = true)
-  public abstract void updateDocumentFromDto(EditDocumentDto editDocumentDto, @MappingTarget Document document);
+  public abstract void updateDocumentFromDto(EditDocumentDto editDocumentDto,
+      @MappingTarget Document document);
+
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "documents", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  public abstract DocumentTag createDocumentTag(CreateDocumentTagDto createDocumentTagDto);
+
+  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "documents", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  public abstract void updateDocumentTagFromDto(EditDocumentTagDto editDocumentTagDto,
+      @MappingTarget DocumentTag documentTag);
 
   @Named("tagsIdsListToTags")
   public Set<DocumentTag> map(List<Long> ids) {
