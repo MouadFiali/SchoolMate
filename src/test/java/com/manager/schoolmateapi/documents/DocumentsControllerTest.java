@@ -334,22 +334,23 @@ public class DocumentsControllerTest {
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.[*]").value(Matchers.hasSize(listOfUserTags.size())))
 				.andExpect(jsonPath("$.[*].name").value(
-						Matchers.containsInAnyOrder(listOfTags.stream().map(tag -> tag.getName()).toArray())))
+						Matchers.containsInAnyOrder(listOfUserTags.stream().map(tag -> tag.getName()).toArray())))
 				.andExpect(jsonPath("$.[*].createdAt").value(Matchers.instanceOf(String.class)));
 	}
 
 	@Test
 	void testEditTag_shouldReturnNewTag() throws Exception {
-		DocumentTag docTag = DocumentTag.builder()
-				.name("DevOps")
-				.user(testUser.getUser())
-				.build();
+		DocumentTag docTag = documentTagsRepository.save(
+				DocumentTag.builder()
+						.name("DevOps")
+						.user(testUser.getUser())
+						.build());
 
 		EditDocumentTagDto eTagDto = EditDocumentTagDto.builder().name("DevOps Resources").build();
 
 		mockMvc
 				.perform(
-						post(String.format("/documents/tags/%d", docTag.getId()))
+						patch(String.format("/documents/tags/%d", docTag.getId()))
 								.with(user(testUser))
 								.contentType(MediaType.APPLICATION_JSON)
 								.content(objectMapper.writeValueAsString(eTagDto)))
@@ -366,16 +367,17 @@ public class DocumentsControllerTest {
 
 	@Test
 	void testEditTag_givenWrongId_shouldReturnNotFound() throws Exception {
-		DocumentTag docTag = DocumentTag.builder()
-				.name("DevOps")
-				.user(testUser.getUser())
-				.build();
+		DocumentTag docTag = documentTagsRepository.save(
+				DocumentTag.builder()
+						.name("DevOps")
+						.user(testUser.getUser())
+						.build());
 
 		EditDocumentTagDto eTagDto = EditDocumentTagDto.builder().name("DevOps Resources").build();
 
 		mockMvc
 				.perform(
-						post(String.format("/documents/tags/%d", docTag.getId() + 1))
+						patch(String.format("/documents/tags/%d", docTag.getId() + 1))
 								.with(user(testUser))
 								.content(objectMapper.writeValueAsString(eTagDto))
 								.contentType(MediaType.APPLICATION_JSON))
