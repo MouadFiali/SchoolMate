@@ -51,15 +51,11 @@ public class AlertService {
      }
        
     public Alert cancelAlert(Long id)  {
-      Alert alert = getAlertById(id);
-      if (alert == null) {   
-           // throw new Exception("Alert not found with id: " + id);
-           throw new ResponseStatusException(HttpStatus.NOT_FOUND);     
-      }
-      
+      Alert alert = getAlertById(id);//IDEM 
+   
       if (alert.getStatus() == AlertStatus.CANCELLED) {
           //throw new Exception("Alert is already cancelled");
-           throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+           throw new ResponseStatusException(HttpStatus.CONFLICT);
       }
       
       alert.setStatus(AlertStatus.CANCELLED);
@@ -70,16 +66,12 @@ public class AlertService {
     }
 
   public Alert confirmAlert(Long id) {
-      Alert alert = getAlertById(id);
-      
-      if (alert == null) {
-         // throw new Exception("Alert not found with id: " + id);
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND );
-      }
+      Alert alert = getAlertById(id);//idem
+         
       
       if (alert.getStatus() == AlertStatus.CONFIRMED) {
           //throw new Exception("Alert is already confirmed");
-          throw new ResponseStatusException(HttpStatus.ALREADY_REPORTED);
+          throw new ResponseStatusException(HttpStatus.CONFLICT);
       }
       
       alert.setStatus(AlertStatus.CONFIRMED);
