@@ -21,6 +21,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -141,7 +142,7 @@ public class DocumentsControllerTest {
 				.andExpect(
 						jsonPath("$.id").value(Matchers.anyOf(Matchers.instanceOf(Integer.class), Matchers.instanceOf(long.class))))
 				.andExpect(jsonPath("$.name").value(data.getName()))
-				.andExpect(jsonPath("$.shared").value(data.getShared()))
+				.andExpect(jsonPath("$.shared").value(data.isShared()))
 				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(data.getTags().size())))
 				.andReturn();
 
@@ -150,6 +151,37 @@ public class DocumentsControllerTest {
 		assertTrue(newDoc.isPresent());
 		assertNotNull(newDoc.get().getUser());
 		assertEquals(newDoc.get().getUser().getId(), testUser.getUser().getId());
+	}
+
+	@Test
+	public void testFileUpload_givenWrongTagIds_shouldReturnNotFound() throws Exception {
+		MockMultipartFile file = new MockMultipartFile(
+				"file",
+				"dummy.pdf",
+				MediaType.APPLICATION_PDF_VALUE,
+				Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)));
+
+		CreateDocumentDto data = CreateDocumentDto
+				.builder()
+				.name("Résumé TG")
+				.shared(false)
+				.tags(createdTagsIds.stream().map(id -> id + 100).toList())
+				.build();
+
+		MockMultipartFile jsonData = new MockMultipartFile(
+				"data",
+				null,
+				MediaType.APPLICATION_JSON_VALUE,
+				objectMapper.writeValueAsBytes(data));
+
+		mockMvc
+				.perform(
+						multipart("/documents")
+								.file(file)
+								.file(jsonData)
+								.with(user(testUser)))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
 	}
 
 	@Test
@@ -285,10 +317,13 @@ public class DocumentsControllerTest {
 						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
+		List<Long> newTagsIds = createdTagsIds.subList(0, 2);
+
 		EditDocumentDto editData = EditDocumentDto
 				.builder()
 				.name("Résumé Théorie des Graphes")
 				.shared(true)
+				.tags(newTagsIds)
 				.build();
 
 		mockMvc
@@ -300,11 +335,18 @@ public class DocumentsControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.name").value(editData.getName()))
-				.andExpect(jsonPath("$.shared").value(editData.isShared()));
+				.andExpect(jsonPath("$.shared").value(editData.isShared()))
+				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(newTagsIds.size())))
+				.andExpect(jsonPath(
+						"$.tags[*].id",
+						Matchers.containsInAnyOrder(newTagsIds.toArray()),
+						Long.class).exists());
 
 		Document newDoc = documentsRepository.findById(doc.getId()).orElseThrow();
 		assertEquals(editData.getName(), newDoc.getName());
 		assertEquals(editData.isShared(), newDoc.isShared());
+		assertThat(newDoc.getTags().stream().map(tag -> tag.getId()).toList(),
+				Matchers.containsInAnyOrder(newTagsIds.toArray()));
 		assertArrayEquals(
 				newDoc.getTags().stream().map(tag -> tag.getId()).toArray(),
 				doc.getTags().stream().map(tag -> tag.getId()).toArray());
