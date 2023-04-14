@@ -5,9 +5,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +20,11 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -31,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.manager.schoolmateapi.SchoolMateApiApplication;
 import com.manager.schoolmateapi.documents.dto.CreateDocumentDto;
 import com.manager.schoolmateapi.documents.dto.CreateDocumentTagDto;
 import com.manager.schoolmateapi.documents.dto.EditDocumentDto;
@@ -43,9 +46,13 @@ import com.manager.schoolmateapi.users.UserRepository;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
+import com.manager.schoolmateapi.utils.dto.PaginatedResponse;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+import jakarta.transaction.Transactional;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = SchoolMateApiApplication.class)
 @AutoConfigureMockMvc
+@Transactional
 public class DocumentsControllerTest {
 
 	private static String DUMMY_PDF_PATH = "src/test/resources/dummy.pdf";
@@ -70,10 +77,7 @@ public class DocumentsControllerTest {
 	List<Long> createdTagsIds;
 
 	@BeforeEach
-	void setup() {
-		documentsRepository.deleteAll();
-		documentTagsRepository.deleteAll();
-		userRepository.deleteAll();
+	public void setup() {
 		// Create some tags
 		Iterable<DocumentTag> tags = documentTagsRepository.saveAll(
 				List.of(
@@ -98,8 +102,15 @@ public class DocumentsControllerTest {
 		testUser = new MyUserDetails(newUser);
 	}
 
+	@AfterEach
+	public void postTest() {
+		documentsRepository.deleteAllInBatch();
+		documentTagsRepository.deleteAll();
+		userRepository.deleteAll();
+	}
+
 	@Test
-	void testFileUpload_shouldReturnDocumentDetails() throws Exception {
+	public void testFileUpload_shouldReturnDocumentDetails() throws Exception {
 		MockMultipartFile file = new MockMultipartFile(
 				"file",
 				"dummy.pdf",
@@ -142,7 +153,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testFileListing_shoudReturnListOfUploadedDocuments() throws Exception {
+	public void testFileListing_shoudReturnListOfUploadedDocuments() throws Exception {
 		documentsRepository.saveAll(
 				List.of(
 						Document
@@ -151,6 +162,7 @@ public class DocumentsControllerTest {
 								.shared(false)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 								.user(testUser.getUser())
+								.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 								.build(),
 						Document
 								.builder()
@@ -158,18 +170,68 @@ public class DocumentsControllerTest {
 								.shared(false)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 								.user(testUser.getUser())
+								.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 								.build()));
 
-		mockMvc
+		String response = mockMvc
 				.perform(get("/documents")
 						.with(user(testUser)))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.[*]").value(Matchers.hasSize(2)));
+				.andExpect(jsonPath("$.results").value(Matchers.hasSize(2)))
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+
+		objectMapper.readValue(response, PaginatedResponse.class);
 	}
 
 	@Test
-	void testGetDocumentDetails_shoudReturnDocumentDetails() throws Exception {
+	public void testFileListing_withLotsOfItems_shoudReturnListOfUploadedDocuments() throws Exception {
+		List<Document> listOfDocs = new ArrayList<>();
+
+		int pageSize = 30;
+		int page = 2;
+
+		for (int index = 0; index < 100; index++) {
+			listOfDocs.add(
+					Document
+							.builder()
+							.name(String.format("Resource Number %d", index + 1))
+							.shared(false)
+							.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+							.user(testUser.getUser())
+							.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+							.build());
+		}
+
+		documentsRepository.saveAll(listOfDocs);
+
+		String response = mockMvc
+				.perform(get("/documents")
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.with(user(testUser)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.results").value(Matchers.hasSize(pageSize)))
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+
+		@SuppressWarnings("unchecked")
+		PaginatedResponse<Document> paginatedResponse = (PaginatedResponse<Document>) objectMapper.readValue(response,
+				PaginatedResponse.class);
+
+		assertEquals(paginatedResponse.getResults().size(), paginatedResponse.getCount());
+		assertEquals(paginatedResponse.getPage(), page);
+		assertEquals(paginatedResponse.getTotalItems(), listOfDocs.size());
+		assertEquals(paginatedResponse.getCount(), pageSize);
+		assertFalse(paginatedResponse.isLast());
+	}
+
+	@Test
+	public void testGetDocumentDetails_shoudReturnDocumentDetails() throws Exception {
 		Document doc = documentsRepository.save(
 				Document
 						.builder()
@@ -177,6 +239,7 @@ public class DocumentsControllerTest {
 						.shared(false)
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 						.user(testUser.getUser())
+						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
 		mockMvc
@@ -187,11 +250,11 @@ public class DocumentsControllerTest {
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.name").value(doc.getName()))
 				.andExpect(jsonPath("$.shared").value(doc.isShared()))
-				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(0)));
+				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(createdTagsIds.size())));
 	}
 
 	@Test
-	void testGetDocumentDetails_givenWrongId_shoudReturnNotFound() throws Exception {
+	public void testGetDocumentDetails_givenWrongId_shoudReturnNotFound() throws Exception {
 		Document doc = documentsRepository.save(
 				Document
 						.builder()
@@ -199,6 +262,7 @@ public class DocumentsControllerTest {
 						.shared(false)
 						.user(testUser.getUser())
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
 		mockMvc
@@ -210,8 +274,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	@Transactional
-	void testDocumentEditDetails_shouldReturnNewDocumentDetails() throws Exception {
+	public void testDocumentEditDetails_shouldReturnNewDocumentDetails() throws Exception {
 		Document doc = documentsRepository.save(
 				Document
 						.builder()
@@ -219,6 +282,7 @@ public class DocumentsControllerTest {
 						.shared(false)
 						.user(testUser.getUser())
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
 		EditDocumentDto editData = EditDocumentDto
@@ -247,13 +311,14 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testDeleteDocument_shoudReturnSuccessMessage() throws Exception {
+	public void testDeleteDocument_shoudReturnSuccessMessage() throws Exception {
 		Document doc = documentsRepository.save(
 				Document
 						.builder()
 						.name("PostgreSQL Cheatsheet")
 						.shared(true)
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
 		mockMvc
@@ -268,13 +333,14 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testDocumentDownload_shoudReturnFileBytes() throws Exception {
+	public void testDocumentDownload_shoudReturnFileBytes() throws Exception {
 		Document doc = documentsRepository.save(
 				Document
 						.builder()
 						.name("PostgreSQL Cheatsheet")
 						.shared(true)
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
 						.user(testUser.getUser())
 						.build());
 
@@ -288,7 +354,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testAddTag_shouldReturnNewTag() throws Exception {
+	public void testAddTag_shouldReturnNewTag() throws Exception {
 		CreateDocumentTagDto cTagDto = CreateDocumentTagDto.builder().name("PFA").build();
 
 		MvcResult result = mockMvc.perform(
@@ -312,7 +378,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testListTags_shouldReturnTags() throws Exception {
+	public void testListTags_shouldReturnTags() throws Exception {
 		// List that contains tags owned by user
 		List<DocumentTag> listOfUserTags = List.of(
 				DocumentTag.builder().name("PFE").user(testUser.getUser()).build(),
@@ -341,7 +407,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testEditTag_shouldReturnNewTag() throws Exception {
+	public void testEditTag_shouldReturnNewTag() throws Exception {
 		DocumentTag docTag = documentTagsRepository.save(
 				DocumentTag.builder()
 						.name("DevOps")
@@ -368,7 +434,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testEditTag_givenWrongId_shouldReturnNotFound() throws Exception {
+	public void testEditTag_givenWrongId_shouldReturnNotFound() throws Exception {
 		DocumentTag docTag = documentTagsRepository.save(
 				DocumentTag.builder()
 						.name("DevOps")
@@ -388,7 +454,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testDeleteTag_shouldReturnSuccessMessage() throws Exception {
+	public void testDeleteTag_shouldReturnSuccessMessage() throws Exception {
 		DocumentTag docTag = documentTagsRepository.save(
 				DocumentTag.builder()
 						.name("Test Driven Development :(")
@@ -408,7 +474,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	void testDeleteTag_givenWrongId_shouldReturnSuccessMessage() throws Exception {
+	public void testDeleteTag_givenWrongId_shouldReturnSuccessMessage() throws Exception {
 		DocumentTag docTag = documentTagsRepository.save(
 				DocumentTag.builder()
 						.name("Test Driven Development :(")
