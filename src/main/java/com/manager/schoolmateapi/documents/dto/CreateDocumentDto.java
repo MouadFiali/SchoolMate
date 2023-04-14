@@ -21,5 +21,5 @@ public class CreateDocumentDto {
   private List<Long> tags;
 
   @NotNull(message = "Shared is required")
-  private Boolean shared;
+  private boolean shared;
 }
