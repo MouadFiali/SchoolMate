@@ -1,12 +1,15 @@
 package com.manager.schoolmateapi.documents;
 
 import java.io.InputStream;
+import java.util.List;
 
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MimeType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +37,7 @@ import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.utils.MessageResponse;
 import com.manager.schoolmateapi.utils.StringUtils;
+import com.manager.schoolmateapi.utils.dto.PaginatedResponse;
 
 import jakarta.validation.Valid;
 
@@ -52,9 +57,27 @@ public class DocumentsController {
     return documentsService.uploadDocumentForUser(userDetails.getUser(), file, data);
   }
 
-  @GetMapping("")
-  public Iterable<Document> getAllUserDocuments(@AuthenticationPrincipal MyUserDetails userDetails) {
-    return documentsService.getAllUserDocuments(userDetails.getUser());
+  @GetMapping(path = "")
+  public PaginatedResponse<Document> getAllUserDocuments(
+      @AuthenticationPrincipal MyUserDetails userDetails,
+      Pageable pageable,
+      @RequestParam(required = false, value = "tags") List<Long> tags) {
+
+    Page<Document> results = documentsService.getAllUserDocumentsPaginated(
+        userDetails.getUser(),
+        pageable,
+        tags);
+
+    PaginatedResponse<Document> response = PaginatedResponse.<Document>builder()
+        .results(results.getContent())
+        .page(results.getNumber())
+        .totalPages(results.getTotalPages())
+        .count(results.getNumberOfElements())
+        .totalItems(results.getTotalElements())
+        .last(results.isLast())
+        .build();
+
+    return response;
   }
 
   @GetMapping("/{id}")

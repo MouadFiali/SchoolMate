@@ -2,12 +2,11 @@ package com.manager.schoolmateapi.documents.models;
 
 import java.util.Date;
 import java.util.Set;
-import java.util.HashSet;
-
 import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.manager.schoolmateapi.users.models.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -57,8 +56,7 @@ public class Document {
   @JsonIgnore
   private User user;
 
-  @Builder.Default
-  @ManyToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinTable(name = "documents_document_tags", joinColumns = @JoinColumn(name = "document_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
-  private Set<DocumentTag> tags = new HashSet<>();
+  private Set<DocumentTag> tags;
 }

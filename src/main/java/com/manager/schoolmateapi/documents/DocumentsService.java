@@ -1,9 +1,12 @@
 package com.manager.schoolmateapi.documents;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +75,15 @@ public class DocumentsService {
   @Transactional
   public Iterable<Document> getAllUserDocuments(User user) {
     return documentsRepository.findByUser(user);
+  }
+
+  @Transactional
+  public Page<Document> getAllUserDocumentsPaginated(User user, Pageable pageable, List<Long> tags) {
+    if (tags != null && tags.size() > 0) {
+      Iterable<DocumentTag> listTags = documentTagsRepository.findAllByIdInAndUser(tags, user);
+      return documentsRepository.findByUserAndTagsIn(user, listTags, pageable);
+    }
+    return documentsRepository.findByUser(user, pageable);
   }
 
   @Transactional
