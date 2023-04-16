@@ -1,7 +1,11 @@
 package com.manager.schoolmateapi.users.models;
 
+import java.util.Set;
+
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.manager.schoolmateapi.complaints.models.Complaint;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 
 import jakarta.persistence.Column;
@@ -11,6 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -45,6 +50,14 @@ public class User {
 
 	@Column(name = "is_active", nullable = false)
 	private boolean isActive;
+
+	@OneToOne(mappedBy = "complainant")
+	@JsonIgnore
+	private Set<Complaint> complaints;
+
+	@OneToOne(mappedBy = "handler")
+	@JsonIgnore
+	private Set<Complaint> assignedComplaints;
 
 	//Crypt password before saving
 	public void setPassword(String password){
