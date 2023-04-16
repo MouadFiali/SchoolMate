@@ -4,11 +4,12 @@ import com.manager.schoolmateapi.complaints.enumerations.BuildingProb;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-public class CreateBuildingComplaintDto {
-
-    @NotBlank(message = "The description is required")
-    private String description;
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CreateBuildingComplaintDto extends CreateComplaintDto {
 
     @NotBlank(message = "The building reference is required")
     @Pattern(regexp = "[a-zA-Z]$", 

@@ -4,11 +4,12 @@ import com.manager.schoolmateapi.complaints.enumerations.FacilityType;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-public class CreateFacilityComplaintDto {
-    
-    @NotBlank(message = "The description is required")
-    private String description;
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CreateFacilityComplaintDto extends CreateComplaintDto {
 
     @NotBlank(message = "The facility type is required")
     private FacilityType facilityType;
