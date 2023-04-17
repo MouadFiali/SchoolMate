@@ -11,6 +11,7 @@ import com.manager.schoolmateapi.alerts.dto.CreateAlertDto;
 import com.manager.schoolmateapi.alerts.dto.EditAlertDto;
 import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.mappers.AMapper;
+import com.manager.schoolmateapi.users.models.User;
 
 @Service
 
@@ -25,47 +26,48 @@ public class AlertService {
      private AlertRepository alertRepository;
 
 
-     public Alert getAlertById(Long id){
-        return alertRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+     public Alert getAlertById(Long id, User user){
+        return alertRepository.findByIdAndUser(id,user).orElseThrow(NOT_FOUND_HANDLER);
      }
 
-     public Iterable<Alert> getAllAlerts(){
-        return alertRepository.findAll();
+     public Iterable<Alert> getAllUserAlerts(User user){
+        return alertRepository.findByUser(user);
      }
 
-     public Alert addAlert(CreateAlertDto createAlertDto ){
+     public Alert addUserAlert(CreateAlertDto createAlertDto,User user){
+
+         //createAlertDto.setUser(user);    
+
 
         return alertRepository.save(dtoMapper.createDtoToAlert(createAlertDto));
      }
 
-     public Alert editAlert(Long id , EditAlertDto editAlertDto){
+     public Alert editUserAlert(Long id , EditAlertDto editAlertDto,User user){
        
-       Alert alert = alertRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+       Alert alert = alertRepository.findByIdAndUser(id,user).orElseThrow(NOT_FOUND_HANDLER);
        dtoMapper.updateAlertFromDto(editAlertDto, alert);
        alertRepository.save(alert);
        return alert;
      }
 
-     public void deleteAlert(Long id){
-        alertRepository.delete( alertRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER));
+     public void deleteUserAlert(Long id,User user){
+        alertRepository.delete( alertRepository.findByIdAndUser(id,user).orElseThrow(NOT_FOUND_HANDLER));
      }
        
-    public Alert cancelAlert(Long id)  {
-      Alert alert = getAlertById(id); 
-   
-      if (alert.getStatus() == AlertStatus.CANCELLED) {
-           throw new ResponseStatusException(HttpStatus.CONFLICT);
-      }
-      
-      alert.setStatus(AlertStatus.CANCELLED);
-      
-       return alertRepository.save(alert);
+    public Alert cancelUserAlert(Long id,User user) throws Exception{
+        Alert alert = alertRepository.findByIdAndUser(id,user).orElseThrow(NOT_FOUND_HANDLER);
+        if (alert.getStatus() == AlertStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
+        }
+        alert.setStatus(AlertStatus.CANCELLED);
+        alertRepository.save(alert);
+        return alert;
        
   
     }
 
-  public Alert confirmAlert(Long id) {
-      Alert alert = getAlertById(id);
+  public Alert confirmUserAlert(Long id,User user) {
+   Alert alert = alertRepository.findByIdAndUser(id,user).orElseThrow(NOT_FOUND_HANDLER);
 
       
       if (alert.getStatus() == AlertStatus.CONFIRMED) {
