@@ -35,10 +35,8 @@ public class AlertService {
      }
 
      public Alert addUserAlert(CreateAlertDto createAlertDto,User user){
-
-         //createAlertDto.setUser(user);    
-
-
+        Alert alert = dtoMapper.createDtoToAlert(createAlertDto);
+        alert.setUser(user);
         return alertRepository.save(dtoMapper.createDtoToAlert(createAlertDto));
      }
 

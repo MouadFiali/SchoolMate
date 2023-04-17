@@ -35,7 +35,7 @@ public class AlertController {
     }
     @GetMapping(value="/alerts/{id}")
     Alert  getUserAlert( @AuthenticationPrincipal MyUserDetails userDetails,@PathVariable("id") Long id) {
-       return alertService.getAlertById(,id, userDetails.getUser());
+       return alertService.getAlertById(id, userDetails.getUser());
     }
     @PatchMapping("/alerts/{id}")
     Alert updateUserAlert(
@@ -50,7 +50,6 @@ public class AlertController {
     Alert cancelUserAlert(@AuthenticationPrincipal MyUserDetails userDetails,@PathVariable("id") Long id) throws Exception{
          return alertService.cancelUserAlert(id, userDetails.getUser());
     }
-
     @PatchMapping("/alerts/{id}/confirm")
     Alert confirmUserAlert(@AuthenticationPrincipal MyUserDetails userDetails,@PathVariable("id") Long id) throws Exception{
          return alertService.confirmUserAlert(id, userDetails.getUser());
