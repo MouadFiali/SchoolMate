@@ -2,6 +2,7 @@ package com.manager.schoolmateapi.documents;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import com.manager.schoolmateapi.documents.repositories.DocumentsRepository;
 import com.manager.schoolmateapi.mappers.DocumentMapper;
 import com.manager.schoolmateapi.users.UserRepository;
 import com.manager.schoolmateapi.users.models.User;
+import com.manager.schoolmateapi.users.services.UserService;
 
 @Service
 public class DocumentsService {
@@ -35,6 +37,9 @@ public class DocumentsService {
 
   @Autowired
   UserRepository userRepository;
+
+  @Autowired
+  UserService userService;
 
   @Autowired
   DocumentMapper documentMapper;
@@ -58,6 +63,7 @@ public class DocumentsService {
     Document newDocument = documentMapper.createDtoToDocument(createDocumentDto);
 
     checkTagsOwnership(user, newDocument.getTags());
+
     try {
       // Save the file
       newDocument.setFile(file.getBytes());
@@ -93,6 +99,7 @@ public class DocumentsService {
     Document document = documentsRepository.findByIdAndUser(id, user).orElseThrow(DOCUMENT_NOT_FOUND_HANDLER);
 
     checkTagsOwnership(user, document.getTags());
+
     documentMapper.updateDocumentFromDto(editDocumentDto, document);
     documentsRepository.save(document);
 
@@ -102,6 +109,11 @@ public class DocumentsService {
   public void deleteUserDocument(long id, User user) {
     documentsRepository.delete(
         documentsRepository.findById(id).orElseThrow(DOCUMENT_NOT_FOUND_HANDLER));
+  }
+
+  public Page<Document> getPublicUserDocuments(long userId, Pageable pageable) {
+    userService.getUser(userId);
+    return documentsRepository.findByUserIdAndSharedTrue(userId, pageable);
   }
 
   // ------ Document Tags ------ //

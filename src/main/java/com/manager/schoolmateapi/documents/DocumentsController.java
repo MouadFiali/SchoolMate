@@ -62,7 +62,7 @@ public class DocumentsController {
       @AuthenticationPrincipal MyUserDetails userDetails,
       Pageable pageable,
       @RequestParam(required = false, value = "tags") List<Long> tags) {
-
+    
     Page<Document> results = documentsService.getAllUserDocumentsPaginated(
         userDetails.getUser(),
         pageable,
@@ -126,6 +126,26 @@ public class DocumentsController {
           HttpStatus.INTERNAL_SERVER_ERROR,
           "An error occured while processing your file");
     }
+  }
+
+  @GetMapping("/user/{id}")
+  public PaginatedResponse<Document> getOtherUserDocuments(
+    @AuthenticationPrincipal MyUserDetails userDetails,
+    Pageable pageable,
+    @PathVariable Long id) {
+
+    Page<Document> results = documentsService.getPublicUserDocuments(id, pageable);
+
+    PaginatedResponse<Document> response = PaginatedResponse.<Document>builder()
+        .results(results.getContent())
+        .page(results.getNumber())
+        .totalPages(results.getTotalPages())
+        .count(results.getNumberOfElements())
+        .totalItems(results.getTotalElements())
+        .last(results.isLast())
+        .build();
+
+    return response;
   }
 
   // ------ Document Tags ------ //

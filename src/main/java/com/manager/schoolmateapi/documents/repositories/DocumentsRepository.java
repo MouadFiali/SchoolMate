@@ -17,4 +17,6 @@ public interface DocumentsRepository extends JpaRepository<Document, Long> {
   public Page<Document> findByUser(User user, Pageable pageable);
 
   public Page<Document> findByUserAndTagsIn(User user, Iterable<DocumentTag> tags, Pageable pageable);
+
+  public Page<Document> findByUserIdAndSharedTrue(long userId, Pageable pageable);
 }
