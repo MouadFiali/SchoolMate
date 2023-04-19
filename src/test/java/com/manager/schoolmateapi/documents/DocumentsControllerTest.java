@@ -6,18 +6,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +36,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.manager.schoolmateapi.SchoolMateApiApplication;
@@ -54,6 +59,7 @@ import jakarta.transaction.Transactional;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = SchoolMateApiApplication.class)
 @AutoConfigureMockMvc
+@TestInstance(Lifecycle.PER_CLASS)
 @Transactional
 public class DocumentsControllerTest {
 
@@ -76,23 +82,14 @@ public class DocumentsControllerTest {
 	UserRepository userRepository;
 
 	MyUserDetails testUser;
+	MyUserDetails anotherTestUser;
 
-	List<Long> createdTagsIds;
+	List<Long> userCreatedTagsIds;
+	List<Long> anotherUserCreatedTagsIds;
 
-	@BeforeEach
+	@BeforeAll
 	public void setup() {
-		// Create some tags
-		Iterable<DocumentTag> tags = documentTagsRepository.saveAll(
-				List.of(
-						DocumentTag.builder().name("Théorie des graphes").build(),
-						DocumentTag.builder().name("Compilation").build(),
-						DocumentTag.builder().name("1ère année").build(),
-						DocumentTag.builder().name("2ème année").build()));
-
-		createdTagsIds = StreamSupport.stream(tags.spliterator(), false)
-				.map(tag -> tag.getId()).toList();
-
-		// Create a test user
+		// Create test users
 		User user = new User();
 		user.setFirstName("John");
 		user.setLastName("Smith");
@@ -100,16 +97,41 @@ public class DocumentsControllerTest {
 		user.setPassword("password");
 		user.setEmail("john.smith@gmail.com");
 
-		// Save the test user
+		User anotherUser = new User();
+		anotherUser.setFirstName("Jane");
+		anotherUser.setLastName("Doe");
+		anotherUser.setEmail("jane.doe@gmail.com");
+		anotherUser.setPassword("password");
+		anotherUser.setRole(UserRole.STUDENT);
+		anotherUser.setActive(true);
+
+		// Save the test users
 		User newUser = userRepository.save(user);
 		testUser = new MyUserDetails(newUser);
-	}
 
-	@AfterEach
-	public void postTest() {
-		documentsRepository.deleteAllInBatch();
-		documentTagsRepository.deleteAll();
-		userRepository.deleteAll();
+		User anotherNewUser = userRepository.save(anotherUser);
+		anotherTestUser = new MyUserDetails(anotherNewUser);
+
+		// Create some tags
+		Iterable<DocumentTag> tags = documentTagsRepository.saveAll(
+				List.of(
+						DocumentTag.builder().name("Théorie des graphes").user(testUser.getUser()).build(),
+						DocumentTag.builder().name("Compilation").user(testUser.getUser()).build(),
+						DocumentTag.builder().name("1ère année").user(testUser.getUser()).build(),
+						DocumentTag.builder().name("2ème année").user(testUser.getUser()).build()));
+
+		userCreatedTagsIds = StreamSupport.stream(tags.spliterator(), false)
+				.map(tag -> tag.getId()).toList();
+
+		Iterable<DocumentTag> otherTags = documentTagsRepository.saveAll(
+				List.of(
+						DocumentTag.builder().name("Programmation Linéaire").user(anotherTestUser.getUser()).build(),
+						DocumentTag.builder().name("Théorie des langages").user(anotherTestUser.getUser()).build(),
+						DocumentTag.builder().name("3ème année").user(anotherTestUser.getUser()).build(),
+						DocumentTag.builder().name("PFE").user(anotherTestUser.getUser()).build()));
+
+		anotherUserCreatedTagsIds = StreamSupport.stream(otherTags.spliterator(), false)
+				.map(tag -> tag.getId()).toList();
 	}
 
 	@Test
@@ -124,7 +146,7 @@ public class DocumentsControllerTest {
 				.builder()
 				.name("Résumé TG")
 				.shared(false)
-				.tags(createdTagsIds)
+				.tags(userCreatedTagsIds)
 				.build();
 
 		MockMultipartFile jsonData = new MockMultipartFile(
@@ -148,7 +170,7 @@ public class DocumentsControllerTest {
 				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(data.getTags().size())))
 				.andExpect(jsonPath(
 						"$.tags[*].id",
-						Matchers.containsInAnyOrder(createdTagsIds.toArray()),
+						Matchers.containsInAnyOrder(userCreatedTagsIds.toArray()),
 						Long.class).exists())
 				.andReturn();
 
@@ -162,7 +184,7 @@ public class DocumentsControllerTest {
 		assertEquals(newDoc.get().getTags().size(), data.getTags().size());
 		assertThat(
 				newDoc.get().getTags().stream().map(tag -> tag.getId()).toList(),
-				Matchers.containsInAnyOrder(createdTagsIds.toArray()));
+				Matchers.containsInAnyOrder(userCreatedTagsIds.toArray()));
 	}
 
 	@Test
@@ -173,27 +195,35 @@ public class DocumentsControllerTest {
 				MediaType.APPLICATION_PDF_VALUE,
 				Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)));
 
-		CreateDocumentDto data = CreateDocumentDto
-				.builder()
-				.name("Résumé TG")
-				.shared(false)
-				.tags(createdTagsIds.stream().map(id -> id + 100).toList())
-				.build();
+		List<Long> testingTags = List.of(userCreatedTagsIds.get(0) + 100, anotherUserCreatedTagsIds.get(0));
 
-		MockMultipartFile jsonData = new MockMultipartFile(
+		testingTags.forEach(tag -> {
+			CreateDocumentDto data = CreateDocumentDto
+					.builder()
+					.name("Résumé TG")
+					.shared(false)
+					.tags(List.of(tag))
+					.build();
+
+			try {
+				MockMultipartFile jsonData = new MockMultipartFile(
 				"data",
 				null,
 				MediaType.APPLICATION_JSON_VALUE,
 				objectMapper.writeValueAsBytes(data));
 
-		mockMvc
-				.perform(
-						multipart("/documents")
-								.file(file)
-								.file(jsonData)
-								.with(user(testUser)))
-				.andExpect(status().isNotFound())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+				mockMvc
+						.perform(
+								multipart("/documents")
+										.file(file)
+										.file(jsonData)
+										.with(user(testUser)))
+						.andExpect(status().isNotFound())
+						.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	@Test
@@ -206,7 +236,7 @@ public class DocumentsControllerTest {
 								.shared(false)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 								.user(testUser.getUser())
-								.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+								.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 								.build(),
 						Document
 								.builder()
@@ -214,7 +244,7 @@ public class DocumentsControllerTest {
 								.shared(false)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 								.user(testUser.getUser())
-								.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+								.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 								.build()));
 
 		String response = mockMvc
@@ -245,7 +275,7 @@ public class DocumentsControllerTest {
 							.shared(false)
 							.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 							.user(testUser.getUser())
-							.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+							.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 							.build());
 		}
 
@@ -276,7 +306,7 @@ public class DocumentsControllerTest {
 
 	@Test
 	public void testFileListing_givenTagFilter_shouldReturnFilteredListOfDocuments() throws Exception {
-		List<DocumentTag> createdTags = documentTagsRepository.findAllById(createdTagsIds);
+		List<DocumentTag> createdTags = documentTagsRepository.findAllById(userCreatedTagsIds);
 		List<Document> saved = documentsRepository.saveAll(
 				List.of(
 						Document
@@ -285,7 +315,7 @@ public class DocumentsControllerTest {
 								.shared(false)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 								.user(testUser.getUser())
-								.tags(createdTags.subList(1, 2).stream()
+								.tags(createdTags.subList(0, 2).stream()
 										.collect(Collectors.toSet()))
 								.build(),
 						Document
@@ -294,20 +324,60 @@ public class DocumentsControllerTest {
 								.shared(true)
 								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 								.user(testUser.getUser())
-								.tags(createdTags.subList(0, 1).stream()
+								.tags(createdTags.subList(2, 4).stream()
 										.collect(Collectors.toSet()))
 								.build()));
 
-		logger.info(saved.get(0).getTags().toString());
-
 		String response = mockMvc
 				.perform(get("/documents")
-						.param("tags", String.valueOf(createdTags.get(0).getId()))
+						.queryParam("tags", String.valueOf(createdTags.get(2).getId()))
 						.with(user(testUser)))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.results").value(Matchers.hasSize(1)))
 				.andExpect(jsonPath("$.results[0].name").value("Java Cheatsheet (LOL)"))
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+
+		objectMapper.readValue(response, PaginatedResponse.class);
+	}
+
+	@Test
+	public void testFileListingOfOtherUsers_shouldReturnDocumentsOfOtherUsers() throws Exception {
+		documentsRepository.saveAll(
+			List.of(
+				Document
+					.builder()
+					.name("Shared resource for others")
+					.shared(true)
+					.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+					.user(anotherTestUser.getUser())
+					.build(),
+				Document
+					.builder()
+					.name("Not shared resource for others")
+					.shared(false)
+					.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+					.user(anotherTestUser.getUser())
+					.build(),
+				Document
+					.builder()
+					.name("Out of context")
+					.shared(false)
+					.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+					.user(testUser.getUser())
+					.build()
+			)
+		);
+
+		String response = mockMvc
+				.perform(get("/documents/user/{id}", anotherTestUser.getUser().getId())
+						.with(user(testUser)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.results").value(Matchers.hasSize(1)))
+				.andExpect(jsonPath("$.results[0].name").value("Shared resource for others"))
 				.andReturn()
 				.getResponse()
 				.getContentAsString();
@@ -324,7 +394,7 @@ public class DocumentsControllerTest {
 						.shared(false)
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
 						.user(testUser.getUser())
-						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+						.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
 		mockMvc
@@ -335,10 +405,10 @@ public class DocumentsControllerTest {
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.name").value(doc.getName()))
 				.andExpect(jsonPath("$.shared").value(doc.isShared()))
-				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(createdTagsIds.size())))
+				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(userCreatedTagsIds.size())))
 				.andExpect(jsonPath(
 						"$.tags[*].id",
-						Matchers.containsInAnyOrder(createdTagsIds.toArray()),
+						Matchers.containsInAnyOrder(userCreatedTagsIds.toArray()),
 						Long.class).exists());
 	}
 
@@ -351,7 +421,7 @@ public class DocumentsControllerTest {
 						.shared(false)
 						.user(testUser.getUser())
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
-						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+						.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
 		mockMvc
@@ -371,10 +441,10 @@ public class DocumentsControllerTest {
 						.shared(false)
 						.user(testUser.getUser())
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
-						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+						.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
-		List<Long> newTagsIds = createdTagsIds.subList(0, 2);
+		List<Long> newTagsIds = userCreatedTagsIds.subList(0, 2);
 
 		EditDocumentDto editData = EditDocumentDto
 				.builder()
@@ -414,7 +484,7 @@ public class DocumentsControllerTest {
 						.name("PostgreSQL Cheatsheet")
 						.shared(true)
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
-						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+						.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 						.build());
 
 		mockMvc
@@ -436,7 +506,7 @@ public class DocumentsControllerTest {
 						.name("PostgreSQL Cheatsheet")
 						.shared(true)
 						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
-						.tags(documentTagsRepository.findAllById(createdTagsIds).stream().collect(Collectors.toSet()))
+						.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
 						.user(testUser.getUser())
 						.build());
 
@@ -475,19 +545,7 @@ public class DocumentsControllerTest {
 
 	@Test
 	public void testListTags_shouldReturnTags() throws Exception {
-		// List that contains tags owned by user
-		List<DocumentTag> listOfUserTags = List.of(
-				DocumentTag.builder().name("PFE").user(testUser.getUser()).build(),
-				DocumentTag.builder().name("Java Resources").user(testUser.getUser()).build(),
-				DocumentTag.builder().name("Off-Topic").user(testUser.getUser()).build());
-
-		// List that contains tags owned by user and not owned by user
-		List<DocumentTag> listOfTags = new ArrayList<>(
-				List.of(
-						DocumentTag.builder().name("DevOps").build())); // Should not be included in response
-		listOfTags.addAll(listOfUserTags);
-
-		documentTagsRepository.saveAll(listOfTags);
+		List<DocumentTag> listOfUserTags = documentTagsRepository.findAllById(userCreatedTagsIds);
 
 		mockMvc
 				.perform(
