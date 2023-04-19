@@ -15,11 +15,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 
 @Inheritance
 @Entity
+@Data
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "complaints")
@@ -38,13 +42,12 @@ public class Complaint {
     @Column(name = "date", nullable = false)
     private Date date;
 
-    @Column(name = "complainant", nullable = false)
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", updatable = false, insertable = false)
     private User complainant;
 
-    @Column(name = "handler", nullable = false)
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", updatable = false, insertable = false)
     private User handler;
+
 }
