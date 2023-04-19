@@ -57,6 +57,7 @@ public class DocumentsService {
     // Create the doc from DTO
     Document newDocument = documentMapper.createDtoToDocument(createDocumentDto);
 
+    checkTagsOwnership(user, newDocument.getTags());
     try {
       // Save the file
       newDocument.setFile(file.getBytes());
@@ -91,6 +92,7 @@ public class DocumentsService {
   public Document editUserDocument(long id, EditDocumentDto editDocumentDto, User user) {
     Document document = documentsRepository.findByIdAndUser(id, user).orElseThrow(DOCUMENT_NOT_FOUND_HANDLER);
 
+    checkTagsOwnership(user, document.getTags());
     documentMapper.updateDocumentFromDto(editDocumentDto, document);
     documentsRepository.save(document);
 
@@ -122,6 +124,14 @@ public class DocumentsService {
 
   public void deleteDocumentTag(long id, User user) {
     documentTagsRepository.delete(documentTagsRepository.findById(id).orElseThrow(TAG_NOT_FOUND_HANDLER));
+  }
+
+  public void checkTagsOwnership(User user, Set<DocumentTag> tags) {
+    tags.forEach(tag -> {
+      if (tag.getUser() == null || !tag.getUser().getId().equals(user.getId())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document tag not found");
+      }
+    });
   }
 
 }
