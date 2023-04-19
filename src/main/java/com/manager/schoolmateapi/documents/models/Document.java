@@ -22,6 +22,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -54,9 +55,11 @@ public class Document {
   @ManyToOne
   @JoinColumn(name = "user_id")
   @JsonIgnore
+  @EqualsAndHashCode.Exclude()
   private User user;
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "documents_document_tags", joinColumns = @JoinColumn(name = "document_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+  @EqualsAndHashCode.Exclude()
   private Set<DocumentTag> tags;
 }

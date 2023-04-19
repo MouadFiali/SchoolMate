@@ -52,6 +52,7 @@ public class DocumentsService {
     return documentsRepository.findByIdAndUser(documentId, user).orElseThrow(DOCUMENT_NOT_FOUND_HANDLER);
   }
 
+  @Transactional
   public Document uploadDocumentForUser(User user, MultipartFile file, CreateDocumentDto createDocumentDto) {
     // Create the doc from DTO
     Document newDocument = documentMapper.createDtoToDocument(createDocumentDto);
