@@ -17,11 +17,15 @@ public interface UserDtoMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "complaints", ignore = true)
+    @Mapping(target = "assignedComplaints", ignore = true)
     User createUserDtoToUser(CreateUserDto createUserDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "complaints", ignore = true)
+    @Mapping(target = "assignedComplaints", ignore = true)
     void updateUserFromDto(EditUserDto editUserDto, @MappingTarget User user);
     
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -31,5 +35,7 @@ public interface UserDtoMapper {
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "firstName", ignore = true)
     @Mapping(target = "lastName", ignore = true)
+    @Mapping(target = "complaints", ignore = true)
+    @Mapping(target = "assignedComplaints", ignore = true)
     void updatePasswordFromDto(EditPasswordDto editPasswordDto, @MappingTarget User user);
 }
