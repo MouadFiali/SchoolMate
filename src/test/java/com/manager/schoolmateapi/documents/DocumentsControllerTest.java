@@ -12,6 +12,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +25,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -57,6 +58,7 @@ import jakarta.transaction.Transactional;
 public class DocumentsControllerTest {
 
 	private static String DUMMY_PDF_PATH = "src/test/resources/dummy.pdf";
+	private Logger logger = LoggerFactory.getLogger(DocumentsControllerTest.class);
 
 	@Autowired
 	MockMvc mockMvc;
@@ -144,6 +146,10 @@ public class DocumentsControllerTest {
 				.andExpect(jsonPath("$.name").value(data.getName()))
 				.andExpect(jsonPath("$.shared").value(data.isShared()))
 				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(data.getTags().size())))
+				.andExpect(jsonPath(
+						"$.tags[*].id",
+						Matchers.containsInAnyOrder(createdTagsIds.toArray()),
+						Long.class).exists())
 				.andReturn();
 
 		long id = ((Number) JsonPath.parse(result.getResponse().getContentAsString()).read("$.id")).longValue();
@@ -151,6 +157,12 @@ public class DocumentsControllerTest {
 		assertTrue(newDoc.isPresent());
 		assertNotNull(newDoc.get().getUser());
 		assertEquals(newDoc.get().getUser().getId(), testUser.getUser().getId());
+		assertEquals(newDoc.get().getName(), data.getName());
+		assertEquals(newDoc.get().isShared(), data.isShared());
+		assertEquals(newDoc.get().getTags().size(), data.getTags().size());
+		assertThat(
+				newDoc.get().getTags().stream().map(tag -> tag.getId()).toList(),
+				Matchers.containsInAnyOrder(createdTagsIds.toArray()));
 	}
 
 	@Test
@@ -263,6 +275,47 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
+	public void testFileListing_givenTagFilter_shouldReturnFilteredListOfDocuments() throws Exception {
+		List<DocumentTag> createdTags = documentTagsRepository.findAllById(createdTagsIds);
+		List<Document> saved = documentsRepository.saveAll(
+				List.of(
+						Document
+								.builder()
+								.name("Résumé TG")
+								.shared(false)
+								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+								.user(testUser.getUser())
+								.tags(createdTags.subList(1, 2).stream()
+										.collect(Collectors.toSet()))
+								.build(),
+						Document
+								.builder()
+								.name("Java Cheatsheet (LOL)")
+								.shared(true)
+								.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+								.user(testUser.getUser())
+								.tags(createdTags.subList(0, 1).stream()
+										.collect(Collectors.toSet()))
+								.build()));
+
+		logger.info(saved.get(0).getTags().toString());
+
+		String response = mockMvc
+				.perform(get("/documents")
+						.param("tags", String.valueOf(createdTags.get(0).getId()))
+						.with(user(testUser)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.results").value(Matchers.hasSize(1)))
+				.andExpect(jsonPath("$.results[0].name").value("Java Cheatsheet (LOL)"))
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+
+		objectMapper.readValue(response, PaginatedResponse.class);
+	}
+
+	@Test
 	public void testGetDocumentDetails_shoudReturnDocumentDetails() throws Exception {
 		Document doc = documentsRepository.save(
 				Document
@@ -282,7 +335,11 @@ public class DocumentsControllerTest {
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.name").value(doc.getName()))
 				.andExpect(jsonPath("$.shared").value(doc.isShared()))
-				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(createdTagsIds.size())));
+				.andExpect(jsonPath("$.tags").value(Matchers.hasSize(createdTagsIds.size())))
+				.andExpect(jsonPath(
+						"$.tags[*].id",
+						Matchers.containsInAnyOrder(createdTagsIds.toArray()),
+						Long.class).exists());
 	}
 
 	@Test
@@ -347,9 +404,6 @@ public class DocumentsControllerTest {
 		assertEquals(editData.isShared(), newDoc.isShared());
 		assertThat(newDoc.getTags().stream().map(tag -> tag.getId()).toList(),
 				Matchers.containsInAnyOrder(newTagsIds.toArray()));
-		assertArrayEquals(
-				newDoc.getTags().stream().map(tag -> tag.getId()).toArray(),
-				doc.getTags().stream().map(tag -> tag.getId()).toArray());
 	}
 
 	@Test
