@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.hamcrest.Matchers;
@@ -14,13 +13,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.manager.schoolmateapi.SchoolMateApiApplication;
@@ -64,7 +59,6 @@ import jakarta.transaction.Transactional;
 public class DocumentsControllerTest {
 
 	private static String DUMMY_PDF_PATH = "src/test/resources/dummy.pdf";
-	private Logger logger = LoggerFactory.getLogger(DocumentsControllerTest.class);
 
 	@Autowired
 	MockMvc mockMvc;
@@ -307,7 +301,7 @@ public class DocumentsControllerTest {
 	@Test
 	public void testFileListing_givenTagFilter_shouldReturnFilteredListOfDocuments() throws Exception {
 		List<DocumentTag> createdTags = documentTagsRepository.findAllById(userCreatedTagsIds);
-		List<Document> saved = documentsRepository.saveAll(
+		documentsRepository.saveAll(
 				List.of(
 						Document
 								.builder()
