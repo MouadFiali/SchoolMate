@@ -4,10 +4,16 @@ import com.manager.schoolmateapi.complaints.enumerations.RoomProb;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class CreateRoomComplaintDto extends CreateComplaintDto {
     
@@ -18,5 +24,5 @@ public class CreateRoomComplaintDto extends CreateComplaintDto {
 
     @NotBlank(message = "The type of the problem is required")
     private RoomProb roomProb;
-    
+
 }
