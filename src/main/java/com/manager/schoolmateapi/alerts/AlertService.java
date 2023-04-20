@@ -60,7 +60,7 @@ public class AlertService {
         alert.setStatus(AlertStatus.CANCELLED);
         alertRepository.save(alert);
         return alert;
-       
+        
   
     }
 
