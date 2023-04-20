@@ -2,6 +2,7 @@ package com.manager.schoolmateapi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,6 +37,7 @@ public class SecurityConfiguration {
         //To configure
         http.csrf().disable()
             .authorizeHttpRequests()
+            .requestMatchers(HttpMethod.POST, "/users").permitAll()
             .anyRequest().authenticated()
             .and()
             .sessionManagement(session -> session
