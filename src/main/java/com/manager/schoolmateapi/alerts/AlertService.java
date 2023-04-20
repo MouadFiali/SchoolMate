@@ -37,7 +37,7 @@ public class AlertService {
      public Alert addUserAlert(CreateAlertDto createAlertDto,User user){
         Alert alert = dtoMapper.createDtoToAlert(createAlertDto);
         alert.setUser(user);
-        return alertRepository.save(dtoMapper.createDtoToAlert(createAlertDto));
+        return alertRepository.save(alert);
      }
 
      public Alert editUserAlert(Long id , EditAlertDto editAlertDto,User user){
