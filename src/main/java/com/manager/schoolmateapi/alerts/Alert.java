@@ -2,6 +2,7 @@ package com.manager.schoolmateapi.alerts;
 
 import org.springframework.data.geo.Point;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 import com.manager.schoolmateapi.users.models.User;
@@ -33,8 +34,9 @@ public class Alert {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name ="user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @Column(nullable = false)
