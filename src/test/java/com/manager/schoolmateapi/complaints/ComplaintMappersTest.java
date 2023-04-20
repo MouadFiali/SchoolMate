@@ -10,8 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.manager.schoolmateapi.complaints.dto.CreateBuildingComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateFacilityComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateRoomComplaintDto;
-import com.manager.schoolmateapi.complaints.dto.EditComplaintHandlerDto;
-import com.manager.schoolmateapi.complaints.dto.EditComplaintStatusDto;
+import com.manager.schoolmateapi.complaints.dto.EditComplaintStatusAndHandlerDto;
 import com.manager.schoolmateapi.complaints.enumerations.BuildingProb;
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.complaints.enumerations.FacilityType;
@@ -88,7 +87,7 @@ public class ComplaintMappersTest {
 
     @Test
     public void testEditComplaintStatus(){
-        EditComplaintStatusDto editComplaintStatusDto = EditComplaintStatusDto
+        EditComplaintStatusAndHandlerDto editComplaintStatusDto = EditComplaintStatusAndHandlerDto
                 .builder()
                 .status(ComplaintStatus.REJECTED)
                 .build();
@@ -100,7 +99,7 @@ public class ComplaintMappersTest {
                 .roomProb(RoomProb.ELECTRICITY)
                 .build();
 
-        complaintMapper.updateComplaintStatusDtoToComplaint(editComplaintStatusDto, roomComplaint);
+        complaintMapper.updateComplaintStatusAndHandlerDtoToComplaint(editComplaintStatusDto, roomComplaint);
         
         assertThat(roomComplaint.getStatus(), Matchers.is(editComplaintStatusDto.getStatus()));
         //To check if the room and the complaint is not changed
@@ -123,7 +122,7 @@ public class ComplaintMappersTest {
         //get the id to delete it later
         Long id = user.getId();
 
-        EditComplaintHandlerDto editComplaintHandlerDto = EditComplaintHandlerDto
+        EditComplaintStatusAndHandlerDto editComplaintHandlerDto = EditComplaintStatusAndHandlerDto
                 .builder()
                 .handler(user)
                 .build();
@@ -135,7 +134,7 @@ public class ComplaintMappersTest {
                 .roomProb(RoomProb.ELECTRICITY)
                 .build();
 
-        complaintMapper.updateComplaintHandlerDtoToComplaint(editComplaintHandlerDto, roomComplaint);
+        complaintMapper.updateComplaintStatusAndHandlerDtoToComplaint(editComplaintHandlerDto, roomComplaint);
         
         assertThat(roomComplaint.getHandler(), Matchers.is(editComplaintHandlerDto.getHandler()));
         //To check if the room and the complaint is not changed
