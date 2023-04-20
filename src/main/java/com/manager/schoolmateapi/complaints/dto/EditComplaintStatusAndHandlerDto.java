@@ -1,8 +1,9 @@
 package com.manager.schoolmateapi.complaints.dto;
 
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
+import com.manager.schoolmateapi.users.models.User;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditComplaintStatusDto {
+public class EditComplaintStatusAndHandlerDto {
     
-    @NotBlank(message = "The status is required")
+    @Nullable
     private ComplaintStatus status;
+
+    @Nullable
+    private User handler;
 
 }
