@@ -1,7 +1,6 @@
 package com.manager.schoolmateapi.complaints.dto;
 
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
-import com.manager.schoolmateapi.users.models.User;
 
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
@@ -19,6 +18,6 @@ public class EditComplaintStatusAndHandlerDto {
     private ComplaintStatus status;
 
     @Nullable
-    private User handler;
+    private Long handlerId;
 
 }
