@@ -2,9 +2,9 @@ package com.manager.schoolmateapi.complaints.repositories;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import com.manager.schoolmateapi.complaints.models.Complaint;
+import com.manager.schoolmateapi.complaints.models.BuildingComplaint;
 
 @Transactional
-public interface BuildingComplaintRepo extends ComplaintBaseRepo<Complaint>{
+public interface BuildingComplaintRepo extends ComplaintBaseRepo<BuildingComplaint>{
     
 }
