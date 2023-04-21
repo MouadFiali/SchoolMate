@@ -1,6 +1,6 @@
 package com.manager.schoolmateapi.complaints.models;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.users.models.User;
@@ -40,7 +40,7 @@ public class Complaint {
     private ComplaintStatus status;
 
     @Column(name = "date", nullable = false)
-    private Date date;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "user_id", updatable = false, insertable = false)
