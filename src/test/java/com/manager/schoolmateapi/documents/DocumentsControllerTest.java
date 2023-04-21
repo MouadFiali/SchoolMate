@@ -5,11 +5,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -21,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -50,12 +53,9 @@ import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
 import com.manager.schoolmateapi.utils.dto.PaginatedResponse;
 
-import jakarta.transaction.Transactional;
-
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = SchoolMateApiApplication.class)
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
-@Transactional
 public class DocumentsControllerTest {
 
 	private static String DUMMY_PDF_PATH = "src/test/resources/dummy.pdf";
@@ -81,8 +81,13 @@ public class DocumentsControllerTest {
 	List<Long> userCreatedTagsIds;
 	List<Long> anotherUserCreatedTagsIds;
 
-	@BeforeAll
+	@BeforeEach
+	@Transactional
 	public void setup() {
+		documentsRepository.deleteAll();
+		documentTagsRepository.deleteAll();
+		userRepository.deleteAll();
+
 		// Create test users
 		User user = new User();
 		user.setFirstName("John");
@@ -126,6 +131,14 @@ public class DocumentsControllerTest {
 
 		anotherUserCreatedTagsIds = StreamSupport.stream(otherTags.spliterator(), false)
 				.map(tag -> tag.getId()).toList();
+	}
+
+	@AfterEach
+	@Transactional
+	public void postTest() {
+		documentsRepository.deleteAll();
+		documentTagsRepository.deleteAll();
+		userRepository.deleteAll();
 	}
 
 	@Test
@@ -622,7 +635,7 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
-	public void testDeleteTag_givenWrongId_shouldReturnSuccessMessage() throws Exception {
+	public void testDeleteTag_givenWrongId_shouldReturnNotFound() throws Exception {
 		DocumentTag docTag = documentTagsRepository.save(
 				DocumentTag.builder()
 						.name("Test Driven Development :(")
@@ -634,6 +647,32 @@ public class DocumentsControllerTest {
 						delete(String.format("/documents/tags/%d", docTag.getId() + 1))
 								.with(user(testUser)))
 				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+	}
+
+	@Test
+	public void testDeleteTag_givenAttachedTagId_shouldReturnConflictMessage() throws Exception {
+		DocumentTag docTag = documentTagsRepository.save(
+				DocumentTag.builder()
+						.name("Test Driven Development :(")
+						.user(testUser.getUser())
+						.build());
+
+		documentsRepository.save(
+			Document
+					.builder()
+					.name("Théorie des graphes")
+					.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+					.tags(Set.of(docTag))
+					.user(testUser.getUser())
+					.build()
+		);
+
+		mockMvc
+				.perform(
+						delete(String.format("/documents/tags/%d", docTag.getId()))
+								.with(user(testUser)))
+				.andExpect(status().isConflict())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
 	}
 
