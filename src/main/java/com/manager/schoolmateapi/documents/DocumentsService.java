@@ -111,6 +111,7 @@ public class DocumentsService {
         documentsRepository.findById(id).orElseThrow(DOCUMENT_NOT_FOUND_HANDLER));
   }
 
+  @Transactional
   public Page<Document> getPublicUserDocuments(long userId, Pageable pageable) {
     userService.getUser(userId);
     return documentsRepository.findByUserIdAndSharedTrue(userId, pageable);
