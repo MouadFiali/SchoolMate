@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -110,7 +111,7 @@ public class ComplaintsControllerTest {
 		buildingComp.setDescription("The building does not have electricity");
 		buildingComp.setComplainant(complainant.getUser());
 		buildingComp.setStatus(ComplaintStatus.PENDING);
-		buildingComp.setDate(new Date());
+		buildingComp.setDate(LocalDate.now());
 
 		// Room complaint
 		RoomComplaint roomComp = new RoomComplaint();
@@ -120,7 +121,7 @@ public class ComplaintsControllerTest {
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.ASSIGNED);
-		roomComp.setDate(new Date());
+		roomComp.setDate(LocalDate.now());
 
 		// Facility complaint
 		FacilitiesComplaint facilityComp = new FacilitiesComplaint();
@@ -129,7 +130,7 @@ public class ComplaintsControllerTest {
 		facilityComp.setComplainant(complainant.getUser());
 		facilityComp.setHandler(handler.getUser());
 		facilityComp.setStatus(ComplaintStatus.RESOLVING);
-		facilityComp.setDate(new Date());
+		facilityComp.setDate(LocalDate.now());
 
 		//Facility complaint 2 (claimed by complainant 2)
 		FacilitiesComplaint facilityComp2 = new FacilitiesComplaint();
@@ -139,7 +140,7 @@ public class ComplaintsControllerTest {
 		facilityComp2.setComplainant(complainant2.getUser());
 		facilityComp2.setHandler(handler.getUser());
 		facilityComp2.setStatus(ComplaintStatus.CONFIRMED);
-		facilityComp2.setDate(new Date());
+		facilityComp2.setDate(LocalDate.now());
 
 		// Save the test complaints
 		buildingComplaintRepo.save(buildingComp);
