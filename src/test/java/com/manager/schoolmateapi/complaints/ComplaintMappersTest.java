@@ -124,7 +124,7 @@ public class ComplaintMappersTest {
 
         EditComplaintStatusAndHandlerDto editComplaintHandlerDto = EditComplaintStatusAndHandlerDto
                 .builder()
-                .handler(user)
+                .handlerId(id)
                 .build();
 
         RoomComplaint roomComplaint = RoomComplaint
@@ -136,7 +136,7 @@ public class ComplaintMappersTest {
 
         complaintMapper.updateComplaintStatusAndHandlerDtoToComplaint(editComplaintHandlerDto, roomComplaint);
         
-        assertThat(roomComplaint.getHandler(), Matchers.is(editComplaintHandlerDto.getHandler()));
+        assertThat(roomComplaint.getHandler(), Matchers.is(userRepository.findById(editComplaintHandlerDto.getHandlerId()).get()));
         //To check if the room and the complaint is not changed
         assertThat(roomComplaint.getRoom(), Matchers.is("B41"));
 
