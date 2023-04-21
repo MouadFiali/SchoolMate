@@ -135,8 +135,13 @@ public class DocumentsService {
     return documentTagsRepository.save(documentTag);
   }
 
+  @Transactional
   public void deleteDocumentTag(long id, User user) {
-    documentTagsRepository.delete(documentTagsRepository.findById(id).orElseThrow(TAG_NOT_FOUND_HANDLER));
+    DocumentTag docTag = documentTagsRepository.findById(id).orElseThrow(TAG_NOT_FOUND_HANDLER);
+    if (docTag.getDocuments().size() > 0) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "This tag has documents attched to it");
+    }
+    documentTagsRepository.delete(docTag);
   }
 
   public void checkTagsOwnership(User user, Set<DocumentTag> tags) {
