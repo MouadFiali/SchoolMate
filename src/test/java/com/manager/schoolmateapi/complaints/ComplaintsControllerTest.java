@@ -498,7 +498,7 @@ public class ComplaintsControllerTest {
 
 		// update dto
 		EditComplaintStatusAndHandlerDto dto = new EditComplaintStatusAndHandlerDto();
-		dto.setHandler(handler.getUser());
+		dto.setHandlerId(handler.getUser().getId());
 
 		//update the complaint handler with patch (the handler is the user that is logged in)
 		mockMvc.perform(patch("/complaints/" + buildingComp.getId() + "/handling")
