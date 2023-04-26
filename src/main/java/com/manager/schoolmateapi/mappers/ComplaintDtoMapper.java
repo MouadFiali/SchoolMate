@@ -54,7 +54,7 @@ public abstract class ComplaintDtoMapper {
     @Mapping(target = "description", ignore = true)
     @Mapping(target = "complainant", ignore = true)
     @Mapping(source = "handlerId", target = "handler", qualifiedByName = "handlerIdToHandlerUser")
-    public abstract void updateComplaintStatusAndHandlerDtoToComplaint(EditComplaintStatusAndHandlerDto updateComplaintStatusDto, @MappingTarget Complaint complaint);
+    public abstract Complaint updateComplaintStatusAndHandlerDtoToComplaint(EditComplaintStatusAndHandlerDto updateComplaintStatusDto, @MappingTarget Complaint complaint);
 
     @Named("handlerIdToHandlerUser")
     public User handlerIdToHandlerUser(Long handlerId) {
