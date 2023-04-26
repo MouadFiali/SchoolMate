@@ -310,6 +310,30 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$[2].complainant.lastName").value("Smith"))
 						.andReturn();
 	}
+
+	
+	@Test //Test get all complaints of all users
+	public void testGetAllComplaints_shouldReturnAllComplaintsForAll() throws Exception{
+		mockMvc.perform(get("/complaints?scope=all") // or /complaints?type=all&scope=all
+						.with(user(complainant)) //John Smith
+						.contentType("application/json"))
+						.andExpect(status().isOk())
+						.andExpect(content().contentType("application/json"))
+						.andExpect(jsonPath("$.size()").value(4))
+						//First complaint
+						.andExpect(jsonPath("$[0].building").value("A"))
+						.andExpect(jsonPath("$[0].complainant.lastName").value("Smith"))
+						//Second complaint
+						.andExpect(jsonPath("$[1].room").value("C36"))
+						.andExpect(jsonPath("$[1].complainant.lastName").value("Smith"))
+						//Third complaint
+						.andExpect(jsonPath("$[2].facilityType").value("PLAYGROUND"))
+						.andExpect(jsonPath("$[2].complainant.lastName").value("Smith"))
+						//Fourth complaint
+						.andExpect(jsonPath("$[3].facilityType").value("CLASS"))
+						.andExpect(jsonPath("$[3].complainant.lastName").value("Ross"))
+						.andReturn();
+	}
 	//End test get complaint by type------------------------------------
 
 	//Test get complaint by id------------------------------------------
