@@ -65,32 +65,32 @@ public class ComplaintService {
       return roomComplaintRepo.findAll();
   }
 
-  public Iterable<RoomComplaint> getAllRoomComplaintsByUser(User user) {
-    return roomComplaintRepo.findAllByComplainantId(user.getId());
+  public Iterable<RoomComplaint> getAllRoomComplaintsByUser(Long id) {
+    return roomComplaintRepo.findAllByComplainantId(id);
   }
 
   public Iterable<BuildingComplaint> getAllBuildingComplaints() {
       return buildingComplaintRepo.findAll();
   }
 
-  public Iterable<BuildingComplaint> getAllBuildingComplaintsByUser(User user) {
-    return buildingComplaintRepo.findAllByComplainantId(user.getId());
+  public Iterable<BuildingComplaint> getAllBuildingComplaintsByUser(Long id) {
+    return buildingComplaintRepo.findAllByComplainantId(id);
   }
 
   public Iterable<FacilitiesComplaint> getAllFacilitiesComplaints() {
       return facilitiesComplaintRepo.findAll();
   }
 
-  public Iterable<FacilitiesComplaint> getAllFacilitiesComplaintsByUser(User user) {
-    return facilitiesComplaintRepo.findByComplainantId(user.getId());
+  public Iterable<FacilitiesComplaint> getAllFacilitiesComplaintsByUser(Long id) {
+    return facilitiesComplaintRepo.findByComplainantId(id);
   }
 
   public Iterable<Complaint> getAllComplaints() {
     return complaintRepo.findAll();
   }
 
-  public Iterable<Complaint> getAllComplaintsByUser(User user) {
-    return complaintRepo.findAllByComplainantId(user.getId());
+  public Iterable<Complaint> getAllComplaintsByUser(Long id) {
+    return complaintRepo.findAllByComplainantId(id);
   }
 
   public RoomComplaint addRoomComplaint(CreateRoomComplaintDto createRoomComplaintDto, User complainant){
