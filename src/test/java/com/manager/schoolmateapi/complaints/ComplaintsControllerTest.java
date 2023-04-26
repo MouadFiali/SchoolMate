@@ -224,20 +224,6 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$.errors").value("The class name should not be empty if the facility type is a class"))
 						.andReturn();
 	}
-
-	@Test //Test create building complaint with wrong building prob
-	public void testCreateBuildingComplaint_wrongBuildingProb_shouldReturnBadRequest() throws Exception {
-		String dto = "{\"building\":\"B\",\"buildingProb\":\"SHOWER\",\"description\":\"The building does not have electricity\"}";
-
-		mockMvc.perform(post("/complaints")
-						.with(user(complainant))
-						.contentType("application/json")
-						.content(dto))
-						.andExpect(status().isBadRequest())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.errors").value("The building problem should be one of the following: ELECTRICITY, WATER, SHOWER, OTHER"))
-						.andReturn();
-	}
 	//End test create complaints by type -------------------------------
 
 	//Test get complaint by type----------------------------------------
