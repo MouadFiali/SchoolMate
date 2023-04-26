@@ -43,11 +43,11 @@ public class Complaint {
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", updatable = false, insertable = false)
+    @JoinColumn(name = "complainant")
     private User complainant;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", updatable = false, insertable = false)
+    @JoinColumn(name = "handler")
     private User handler;
 
 }
