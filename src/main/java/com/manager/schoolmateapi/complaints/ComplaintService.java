@@ -131,10 +131,17 @@ public class ComplaintService {
     return facilitiesComplaintRepo.save(facilitiesComplaint);
   }
 
-  public RoomComplaint editRoomComplaint(CreateRoomComplaintDto createRoomComplaintDto, Long id){
-    RoomComplaint newComplaint = complaintMapper.createRoomComplaintDtoToRoomComplaint(createRoomComplaintDto);
+  public RoomComplaint editRoomComplaintDetails(CreateRoomComplaintDto createRoomComplaintDto, Long id, User principal){
     // Get the existing complaint
     RoomComplaint oldComplaint = roomComplaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+    if(!oldComplaint.getComplainant().getId().equals(principal.getId())){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this complaint");
+    }
+    if(!oldComplaint.getStatus().equals(ComplaintStatus.PENDING)){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The complaint is already being processed");
+    }
+
+    RoomComplaint newComplaint = complaintMapper.createRoomComplaintDtoToRoomComplaint(createRoomComplaintDto);
 
     oldComplaint.setDescription(newComplaint.getDescription());
     oldComplaint.setRoom(newComplaint.getRoom());
@@ -143,10 +150,17 @@ public class ComplaintService {
     return roomComplaintRepo.save(oldComplaint);
   }
 
-  public BuildingComplaint editBuildingComplaint(CreateBuildingComplaintDto createBuildingComplaintDto, Long id){
-    BuildingComplaint newComplaint = complaintMapper.createBuildingComplaintDtoToBuildingComplaint(createBuildingComplaintDto);
+  public BuildingComplaint editBuildingComplaintDetails(CreateBuildingComplaintDto createBuildingComplaintDto, Long id, User principal){
     // Get the existing complaint
     BuildingComplaint oldComplaint = buildingComplaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+    if(!oldComplaint.getComplainant().getId().equals(principal.getId())){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this complaint");
+    }
+    if(!oldComplaint.getStatus().equals(ComplaintStatus.PENDING)){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The complaint is already being processed");
+    }
+
+    BuildingComplaint newComplaint = complaintMapper.createBuildingComplaintDtoToBuildingComplaint(createBuildingComplaintDto);
 
     oldComplaint.setDescription(newComplaint.getDescription());
     oldComplaint.setBuilding(newComplaint.getBuilding());
@@ -155,10 +169,17 @@ public class ComplaintService {
     return buildingComplaintRepo.save(oldComplaint);
   }
 
-  public FacilitiesComplaint editFacilitiesComplaint(CreateFacilityComplaintDto createFacilityComplaintDto, Long id){
-    FacilitiesComplaint newComplaint = complaintMapper.createFacilityComplaintDtoToFacilityComplaint(createFacilityComplaintDto);
+  public FacilitiesComplaint editFacilitiesComplaintDetails(CreateFacilityComplaintDto createFacilityComplaintDto, Long id, User principal){
     // Get the existing complaint
     FacilitiesComplaint oldComplaint = facilitiesComplaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+    if(!oldComplaint.getComplainant().getId().equals(principal.getId())){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this complaint");
+    }
+    if(!oldComplaint.getStatus().equals(ComplaintStatus.PENDING)){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The complaint is already being processed");
+    }
+
+    FacilitiesComplaint newComplaint = complaintMapper.createFacilityComplaintDtoToFacilityComplaint(createFacilityComplaintDto);
 
     oldComplaint.setDescription(newComplaint.getDescription());
     oldComplaint.setFacilityType(newComplaint.getFacilityType());
@@ -192,16 +213,12 @@ public class ComplaintService {
     }
   }
 
-  public void deleteRoomComplaint(Long id){
-    roomComplaintRepo.deleteById(id);
-  }
-
-  public void deleteBuildingComplaint(Long id){
-    buildingComplaintRepo.deleteById(id);
-  }
-
-  public void deleteFacilitiesComplaint(Long id){
-    facilitiesComplaintRepo.deleteById(id);
+  public void deleteComplaint(Long id, User principal){
+    Complaint complaint = complaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+    if(!complaint.getComplainant().getId().equals(principal.getId())){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this complaint");
+    }
+    complaintRepo.deleteById(id);
   }
 
 }
