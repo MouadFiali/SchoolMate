@@ -1,8 +1,11 @@
 package com.manager.schoolmateapi.complaints;
 
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,9 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Date;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -43,6 +44,7 @@ import com.manager.schoolmateapi.users.models.User;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@TestInstance(Lifecycle.PER_CLASS)
 public class ComplaintsControllerTest {
     @Autowired
 	MockMvc mockMvc;
@@ -69,6 +71,10 @@ public class ComplaintsControllerTest {
 
     @BeforeAll
 	void setup() {
+		// Clear the database
+		buildingComplaintRepo.deleteAll();
+		facilitiesComplaintRepo.deleteAll();
+		roomComplaintRepo.deleteAll();
 	
 		// Create a test user (complainant)
 		User userComplainant = new User();
@@ -161,9 +167,7 @@ public class ComplaintsControllerTest {
 			.description("The building does not have hot water")
 			.build();
 
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-		
-		String response = mockMvc.perform(post("/complaints?type=building")
+		String response = mockMvc.perform(post("/complaints")
 						.with(user(complainant))
 						.contentType("application/json")
 						.content(objectMapper.writeValueAsString(dto)))
@@ -171,10 +175,10 @@ public class ComplaintsControllerTest {
 						.andExpect(content().contentType("application/json"))
 						.andExpect(jsonPath("$.building").value("B"))
 						.andExpect(jsonPath("$.buildingProb").value("SHOWER"))
-						.andExpect(jsonPath("$.handler").value("null"))
+						.andExpect(jsonPath("$.handler").value(IsNull.nullValue()))
 						.andExpect(jsonPath("$.complainant.lastName").value("Smith"))
 						.andExpect(jsonPath("$.status").value("PENDING"))
-						.andExpect(jsonPath("$.date").value(formatter.parse(formatter.format(new Date()))))
+						.andExpect(jsonPath("$.date").value(LocalDate.now().toString()))
 						.andExpect(jsonPath("$.description").value("The building does not have hot water"))
 						.andReturn().getResponse().getContentAsString();
 		
@@ -189,13 +193,13 @@ public class ComplaintsControllerTest {
 			.description("The wifi is not working")
 			.build();
 
-		mockMvc.perform(post("/complaints?type=facilities")
+		mockMvc.perform(post("/complaints")
 						.with(user(complainant))
 						.contentType("application/json")
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isBadRequest())
 						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.message").value("The facility type is required"))
+						.andExpect(jsonPath("$.errors").value("The facility type is required"))
 						.andReturn();
 	}
 
@@ -206,13 +210,13 @@ public class ComplaintsControllerTest {
 			.description("The class is closed very early")
 			.build();
 
-		mockMvc.perform(post("/complaints?type=facilities")
+		mockMvc.perform(post("/complaints")
 						.with(user(complainant))
 						.contentType("application/json")
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isBadRequest())
 						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.message").value("The class name should not be empty if the facility type is a class"))
+						.andExpect(jsonPath("$.errors").value("The class name should not be empty if the facility type is a class"))
 						.andReturn();
 	}
 
@@ -239,7 +243,7 @@ public class ComplaintsControllerTest {
 						.andExpect(content().contentType("application/json"))
 						.andExpect(jsonPath("$[0].building").value("A"))
 						.andExpect(jsonPath("$[0].buildingProb").value("ELECTRICITY"))
-						.andExpect(jsonPath("$[0].handler").value("null"))
+						.andExpect(jsonPath("$[0].handler").value(IsNull.nullValue()))
 						.andExpect(jsonPath("$[0].status").value("PENDING"))
 						.andReturn();
 	}
@@ -491,7 +495,9 @@ public class ComplaintsControllerTest {
 		BuildingComplaint buildingComp = new BuildingComplaint();
 		buildingComp.setBuilding("E");
 		buildingComp.setBuildingProb(BuildingProb.SHOWER);
+		buildingComp.setDescription("The shower is broken");
 		buildingComp.setComplainant(complainant.getUser());
+		buildingComp.setDate(LocalDate.now());
 		buildingComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
