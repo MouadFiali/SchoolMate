@@ -6,5 +6,7 @@ import com.manager.schoolmateapi.complaints.models.RoomComplaint;
 
 @Transactional
 public interface RoomComplaintRepo extends ComplaintBaseRepo<RoomComplaint>{
+
+    Iterable<RoomComplaint> findAllByComplainantId(Long id);
     
 }
