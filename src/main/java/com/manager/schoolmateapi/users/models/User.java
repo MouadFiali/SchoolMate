@@ -12,6 +12,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,11 +52,11 @@ public class User {
 	@Column(name = "is_active", nullable = false)
 	private boolean isActive;
 
-	@OneToMany(mappedBy = "complainant")
+	@OneToMany(mappedBy = "complainant", fetch = FetchType.EAGER)
 	@JsonIgnore
 	private Set<Complaint> complaints;
 
-	@OneToMany(mappedBy = "handler")
+	@OneToMany(mappedBy = "handler", fetch = FetchType.EAGER)
 	@JsonIgnore
 	private Set<Complaint> assignedComplaints;
 
