@@ -479,6 +479,8 @@ public class ComplaintsControllerTest {
 		roomComp.setRoom("D15");
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(LocalDate.now());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.RESOLVING);
 
@@ -510,6 +512,8 @@ public class ComplaintsControllerTest {
 		roomComp.setRoom("D15");
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(LocalDate.now());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.RESOLVING);
 
@@ -573,6 +577,7 @@ public class ComplaintsControllerTest {
 		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
 		facilitiesComp.setComplainant(complainant.getUser());
 		facilitiesComp.setDescription("The playground is broken");
+		facilitiesComp.setDate(LocalDate.now());
 		facilitiesComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -588,8 +593,8 @@ public class ComplaintsControllerTest {
 						.contentType("application/json")
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isBadRequest())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.message").value("The handler is null, the status must be PENDING"))
+						.andExpect(content().contentType("application/problem+json"))
+						.andExpect(jsonPath("$.detail").value("Complaint must be assigned to a handler before changing the status"))
 						.andReturn();
 
 		//delete the complaint
@@ -600,7 +605,7 @@ public class ComplaintsControllerTest {
 
 	//Test update complaint's details---------------------------------------------
 	@Test //when status is PENDING (the complaint is not assigned to a handler yet)
-	public void testUpdateComplaintBody_shouldReturnUpdatedComplaint() throws Exception {
+	public void testUpdateComplaintDetails_shouldReturnUpdatedComplaint() throws Exception {
 		// create a complaint
 		RoomComplaint roomComp = new RoomComplaint();
 		roomComp.setRoom("D15");
@@ -632,13 +637,14 @@ public class ComplaintsControllerTest {
 	}
 
 	@Test //when status is ASSIGNED (the complaint is assigned to a handler)
-	public void testUpdateComplaintBody_shouldReturnForbidden() throws Exception {
+	public void testUpdateComplaintDetails_shouldReturnForbidden() throws Exception {
 		// create a complaint
 		BuildingComplaint buildingComp = new BuildingComplaint();
 		buildingComp.setBuilding("E");
 		buildingComp.setDescription("There is no electricity in the building");
 		buildingComp.setBuildingProb(BuildingProb.SHOWER);
 		buildingComp.setComplainant(complainant.getUser());
+		buildingComp.setDate(LocalDate.now());
 		buildingComp.setHandler(handler.getUser());
 		buildingComp.setStatus(ComplaintStatus.ASSIGNED);
 
@@ -663,7 +669,7 @@ public class ComplaintsControllerTest {
 	}
 
 	@Test //update the complaint of another user
-	public void testUpdateComplaintBodyByOthers_shouldReturnForbidden() throws Exception {
+	public void testUpdateComplaintDetailsByOthers_shouldReturnForbidden() throws Exception {
 		// create a complaint
 		FacilitiesComplaint facilitiesComp = new FacilitiesComplaint();
 		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
