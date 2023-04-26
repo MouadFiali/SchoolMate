@@ -758,6 +758,31 @@ public class ComplaintsControllerTest {
 		//delete the complaint
 		buildingComplaintRepo.deleteById(buildingComp.getId());
 	}
+
+	@Test //delete the complaint of another user
+	public void testDeleteComplaintByOthers_shouldReturnForbidden() throws Exception {
+		// create a complaint
+		FacilitiesComplaint facilitiesComp = new FacilitiesComplaint();
+		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
+		facilitiesComp.setComplainant(complainant2.getUser());
+		facilitiesComp.setDescription("The playground is broken");
+		facilitiesComp.setDate(LocalDate.now());
+		facilitiesComp.setStatus(ComplaintStatus.PENDING);
+
+		//save the complaint
+		facilitiesComp = facilitiesComplaintRepo.save(facilitiesComp);
+
+		//delete the complaint
+		mockMvc.perform(delete("/complaints/" + facilitiesComp.getId())
+						.with(user(complainant)) // complainant is not the owner of the complaint
+						.contentType("application/json"))
+						.andExpect(status().isForbidden())
+						.andReturn();
+
+		//delete the complaint
+		facilitiesComplaintRepo.deleteById(facilitiesComp.getId());
+	}
+
 	//End test delete complaint-----------------------------------------
 
 
