@@ -9,6 +9,6 @@ import com.manager.schoolmateapi.users.models.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
 	public Optional<User> findByEmail(String email);
-	public long DeleteByFirstName(String firstName);
+	public long deleteByFirstName(String firstName);
 
 }
