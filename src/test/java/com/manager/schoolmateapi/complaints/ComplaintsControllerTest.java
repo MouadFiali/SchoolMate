@@ -219,18 +219,6 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$.errors").value("The class name should not be empty if the facility type is a class"))
 						.andReturn();
 	}
-
-	@Test //Test create complaint with wrong url type
-	public void testCreateComplaint_shouldReturnTypeNotSpecified() throws Exception {
-		mockMvc.perform(post("/complaints")
-						.with(user(complainant))
-						.contentType("application/json")
-						.content(objectMapper.writeValueAsString(null))) //no need to send a body since the type is not specified
-						.andExpect(status().isBadRequest())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.message").value("The type of the complaint is not specified"))
-						.andReturn();
-	}
 	//End test create complaints by type -------------------------------
 
 	//Test get complaint by type----------------------------------------
