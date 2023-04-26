@@ -3,6 +3,7 @@ package com.manager.schoolmateapi.complaints.dto;
 import com.manager.schoolmateapi.complaints.enumerations.BuildingProb;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +23,7 @@ public class CreateBuildingComplaintDto extends CreateComplaintDto {
     message = "The building reference is invalid, please give the reference of the building in the format 'A' or 'B'")
     private String building;
 
-    @NotBlank(message = "The type of the problem is required")
+    @NotNull(message = "The building problem is required")
     private BuildingProb buildingProb;
 
 }

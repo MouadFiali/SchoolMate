@@ -3,7 +3,7 @@ package com.manager.schoolmateapi.complaints.dto;
 import com.manager.schoolmateapi.complaints.enumerations.FacilityType;
 import com.manager.schoolmateapi.complaints.validators.NotNullOnCondition;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,8 +18,7 @@ import lombok.experimental.SuperBuilder;
 @NotNullOnCondition(className = "className", facilityType = "facilityType")
 @EqualsAndHashCode(callSuper = true)
 public class CreateFacilityComplaintDto extends CreateComplaintDto {
-
-    @NotBlank(message = "The facility type is required")
+    @NotNull(message = "The facility type is required")
     private FacilityType facilityType;
 
     @Pattern(regexp = "[a-zA-Z]+[1-9]+$", 
