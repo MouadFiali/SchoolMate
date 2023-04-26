@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -23,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.manager.schoolmateapi.SchoolMateApiApplication;
 import com.manager.schoolmateapi.complaints.dto.CreateBuildingComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateFacilityComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateRoomComplaintDto;
@@ -42,7 +44,7 @@ import com.manager.schoolmateapi.users.enumerations.UserRole;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = SchoolMateApiApplication.class)
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
 public class ComplaintsControllerTest {
@@ -70,11 +72,14 @@ public class ComplaintsControllerTest {
 
 
     @BeforeAll
+	@Transactional
 	void setup() {
 		// Clear the database
 		buildingComplaintRepo.deleteAll();
 		facilitiesComplaintRepo.deleteAll();
 		roomComplaintRepo.deleteAll();
+		userRepository.deleteAll();
+
 	
 		// Create a test user (complainant)
 		User userComplainant = new User();
@@ -217,6 +222,20 @@ public class ComplaintsControllerTest {
 						.andExpect(status().isBadRequest())
 						.andExpect(content().contentType("application/json"))
 						.andExpect(jsonPath("$.errors").value("The class name should not be empty if the facility type is a class"))
+						.andReturn();
+	}
+
+	@Test //Test create building complaint with wrong building prob
+	public void testCreateBuildingComplaint_wrongBuildingProb_shouldReturnBadRequest() throws Exception {
+		String dto = "{\"building\":\"B\",\"buildingProb\":\"SHOWER\",\"description\":\"The building does not have electricity\"}";
+
+		mockMvc.perform(post("/complaints")
+						.with(user(complainant))
+						.contentType("application/json")
+						.content(dto))
+						.andExpect(status().isBadRequest())
+						.andExpect(content().contentType("application/json"))
+						.andExpect(jsonPath("$.errors").value("The building problem should be one of the following: ELECTRICITY, WATER, SHOWER, OTHER"))
 						.andReturn();
 	}
 	//End test create complaints by type -------------------------------
