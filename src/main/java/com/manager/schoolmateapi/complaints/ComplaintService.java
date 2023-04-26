@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.manager.schoolmateapi.complaints.dto.CreateBuildingComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateFacilityComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateRoomComplaintDto;
+import com.manager.schoolmateapi.complaints.dto.EditComplaintStatusAndHandlerDto;
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.complaints.enumerations.FacilityType;
 import com.manager.schoolmateapi.complaints.models.BuildingComplaint;
@@ -168,6 +169,29 @@ public class ComplaintService {
     return facilitiesComplaintRepo.save(oldComplaint);
   }
 
+  public Complaint editComplaintStatusAndHandler(EditComplaintStatusAndHandlerDto editComplaintStatusAndHandlerDto, Long id){
+    Complaint complaint = complaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+    if(editComplaintStatusAndHandlerDto.getStatus()!=null && editComplaintStatusAndHandlerDto.getHandlerId()!=null){
+      return complaintMapper.updateComplaintStatusAndHandlerDtoToComplaint(editComplaintStatusAndHandlerDto, complaint);
+    }
+    else if(editComplaintStatusAndHandlerDto.getStatus()!=null){
+      if(complaint.getHandler()==null && !editComplaintStatusAndHandlerDto.getStatus().equals(ComplaintStatus.PENDING)){
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Complaint must be assigned to a handler before changing the status");
+      } else {
+        return complaintMapper.updateComplaintStatusAndHandlerDtoToComplaint(editComplaintStatusAndHandlerDto, complaint);
+      }
+    }
+    else if(editComplaintStatusAndHandlerDto.getHandlerId()!=null){
+      if(complaint.getHandler()==null){
+        editComplaintStatusAndHandlerDto.setStatus(ComplaintStatus.ASSIGNED);
+      }
+      return complaintMapper.updateComplaintStatusAndHandlerDtoToComplaint(editComplaintStatusAndHandlerDto, complaint);
+    }
+    else{
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "In the request body, no status or handlerId was specified");
+    }
+  }
+
   public void deleteRoomComplaint(Long id){
     roomComplaintRepo.deleteById(id);
   }
@@ -179,5 +203,5 @@ public class ComplaintService {
   public void deleteFacilitiesComplaint(Long id){
     facilitiesComplaintRepo.deleteById(id);
   }
-    
+
 }
