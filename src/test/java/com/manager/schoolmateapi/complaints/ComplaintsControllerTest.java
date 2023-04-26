@@ -243,11 +243,12 @@ public class ComplaintsControllerTest {
 	//Test get complaint by type----------------------------------------
 	@Test //Test get building complaints of all users
 	public void testGetBuildingComplaints_shouldReturnAllBuildingComps() throws Exception {
-		mockMvc.perform(get("/complaints?type=building&scope=all")
+		mockMvc.perform(get("/complaints?type=building")
 						.with(user(complainant))
 						.contentType("application/json"))
 						.andExpect(status().isOk())
 						.andExpect(content().contentType("application/json"))
+						.andExpect(jsonPath("$.size()").value(1))
 						.andExpect(jsonPath("$[0].building").value("A"))
 						.andExpect(jsonPath("$[0].buildingProb").value("ELECTRICITY"))
 						.andExpect(jsonPath("$[0].handler").value(IsNull.nullValue()))
@@ -257,7 +258,7 @@ public class ComplaintsControllerTest {
 
 	@Test //Test get facilities complaints of a specific user
 	public void testGetFacilitiesComplaints_shouldReturnFacilitiesCompsForUser() throws Exception {
-		mockMvc.perform(get("/complaints?type=facilities&scope=user")
+		mockMvc.perform(get("/complaints?type=facilities&user=me")
 						.with(user(complainant))
 						.contentType("application/json"))
 						.andExpect(status().isOk())
@@ -272,7 +273,7 @@ public class ComplaintsControllerTest {
 
 	@Test //Test get facilities complaints of all users
 	public void testGetFacilitiesComplaints_shouldReturnFacilitiesCompsForAll() throws Exception {
-		mockMvc.perform(get("/complaints?type=facilities&scope=all")
+		mockMvc.perform(get("/complaints?type=facilities&user=all")
 						.with(user(complainant))
 						.contentType("application/json"))
 						.andExpect(status().isOk())
@@ -293,7 +294,7 @@ public class ComplaintsControllerTest {
 
 	@Test //Test get all complaints of a specific user
 	public void testGetAllComplaints_shouldReturnAllComplaintsForUser() throws Exception{
-		mockMvc.perform(get("/complaints?scope=user") // or /complaints?type=all&scope=user
+		mockMvc.perform(get("/complaints?user=me") // or /complaints?type=all&user=me
 						.with(user(complainant)) //John Smith
 						.contentType("application/json"))
 						.andExpect(status().isOk())
@@ -314,7 +315,7 @@ public class ComplaintsControllerTest {
 	
 	@Test //Test get all complaints of all users
 	public void testGetAllComplaints_shouldReturnAllComplaintsForAll() throws Exception{
-		mockMvc.perform(get("/complaints?scope=all") // or /complaints?type=all&scope=all
+		mockMvc.perform(get("/complaints") // or /complaints?type=all?user=all or /complaints?type=all
 						.with(user(complainant)) //John Smith
 						.contentType("application/json"))
 						.andExpect(status().isOk())
