@@ -93,6 +93,10 @@ public class ComplaintService {
     return complaintRepo.findAllByComplainantId(id);
   }
 
+  public Complaint getComplaint(Long id){
+    return complaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);
+  }
+
   public RoomComplaint addRoomComplaint(CreateRoomComplaintDto createRoomComplaintDto, User complainant){
     RoomComplaint roomComplaint = complaintMapper.createRoomComplaintDtoToRoomComplaint(createRoomComplaintDto);
 
