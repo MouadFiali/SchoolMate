@@ -14,9 +14,11 @@ import com.manager.schoolmateapi.complaints.dto.CreateRoomComplaintDto;
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.complaints.enumerations.FacilityType;
 import com.manager.schoolmateapi.complaints.models.BuildingComplaint;
+import com.manager.schoolmateapi.complaints.models.Complaint;
 import com.manager.schoolmateapi.complaints.models.FacilitiesComplaint;
 import com.manager.schoolmateapi.complaints.models.RoomComplaint;
 import com.manager.schoolmateapi.complaints.repositories.BuildingComplaintRepo;
+import com.manager.schoolmateapi.complaints.repositories.ComplaintRepository;
 import com.manager.schoolmateapi.complaints.repositories.FacilitiesComplaintRepo;
 import com.manager.schoolmateapi.complaints.repositories.RoomComplaintRepo;
 import com.manager.schoolmateapi.mappers.ComplaintDtoMapper;
@@ -42,6 +44,9 @@ public class ComplaintService {
   private FacilitiesComplaintRepo facilitiesComplaintRepo;
 
   @Autowired
+  private ComplaintRepository complaintRepo;
+
+  @Autowired
   private ComplaintDtoMapper complaintMapper;
 
   public RoomComplaint getRoomComplaint(final Long id) {
@@ -60,12 +65,32 @@ public class ComplaintService {
       return roomComplaintRepo.findAll();
   }
 
+  public Iterable<RoomComplaint> getAllRoomComplaintsByUser(User user) {
+    return roomComplaintRepo.findAllByComplainantId(user.getId());
+  }
+
   public Iterable<BuildingComplaint> getAllBuildingComplaints() {
       return buildingComplaintRepo.findAll();
   }
 
+  public Iterable<BuildingComplaint> getAllBuildingComplaintsByUser(User user) {
+    return buildingComplaintRepo.findAllByComplainantId(user.getId());
+  }
+
   public Iterable<FacilitiesComplaint> getAllFacilitiesComplaints() {
       return facilitiesComplaintRepo.findAll();
+  }
+
+  public Iterable<FacilitiesComplaint> getAllFacilitiesComplaintsByUser(User user) {
+    return facilitiesComplaintRepo.findByComplainantId(user.getId());
+  }
+
+  public Iterable<Complaint> getAllComplaints() {
+    return complaintRepo.findAll();
+  }
+
+  public Iterable<Complaint> getAllComplaintsByUser(User user) {
+    return complaintRepo.findAllByComplainantId(user.getId());
   }
 
   public RoomComplaint addRoomComplaint(CreateRoomComplaintDto createRoomComplaintDto, User complainant){
