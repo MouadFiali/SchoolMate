@@ -386,12 +386,16 @@ public class ComplaintsControllerTest {
 		roomComp.setRoom("D15");
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant2.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(LocalDate.now());
 		roomComp.setStatus(ComplaintStatus.PENDING);
 
 		RoomComplaint roomComp2 = new RoomComplaint();
 		roomComp2.setRoom("C8");
 		roomComp2.setRoomProb(RoomProb.ELECTRICITY);
 		roomComp2.setComplainant(complainant2.getUser());
+		roomComp2.setDescription("The electricity is not working");
+		roomComp2.setDate(LocalDate.now());
 		roomComp2.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaints
@@ -422,18 +426,24 @@ public class ComplaintsControllerTest {
 		roomComp.setRoom("D15");
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant2.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(LocalDate.now());
 		roomComp.setStatus(ComplaintStatus.PENDING);
 
 		RoomComplaint roomComp2 = new RoomComplaint();
 		roomComp2.setRoom("C8");
 		roomComp2.setRoomProb(RoomProb.ELECTRICITY);
 		roomComp2.setComplainant(complainant2.getUser());
+		roomComp2.setDescription("The electricity is not working");
+		roomComp2.setDate(LocalDate.now());
 		roomComp2.setStatus(ComplaintStatus.PENDING);
 
 		BuildingComplaint buildingComp = new BuildingComplaint();
 		buildingComp.setBuilding("E");
 		buildingComp.setBuildingProb(BuildingProb.SHOWER);
 		buildingComp.setComplainant(complainant2.getUser());
+		buildingComp.setDescription("The shower is not working");
+		buildingComp.setDate(LocalDate.now());
 		buildingComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaints
