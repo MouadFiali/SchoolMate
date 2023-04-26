@@ -18,10 +18,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 public class RoomComplaint extends Complaint {
     
-    @Column(name = "room", nullable = false)
+    @Column(name = "room")
     private String room;
 
-    @Column(name = "room_problem", nullable = false)
+    @Column(name = "room_problem")
     private RoomProb roomProb;
 
 }

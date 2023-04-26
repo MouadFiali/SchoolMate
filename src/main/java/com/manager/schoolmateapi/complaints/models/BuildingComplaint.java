@@ -18,10 +18,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 public class BuildingComplaint extends Complaint {
     
-    @Column(name = "building", nullable = false)
+    @Column(name = "building")
     private String building;
 
-    @Column(name = "building_prob", nullable = false)
+    @Column(name = "building_prob")
     private BuildingProb buildingProb;
 
 }
