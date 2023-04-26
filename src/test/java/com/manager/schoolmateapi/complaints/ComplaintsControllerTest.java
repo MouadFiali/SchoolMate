@@ -611,6 +611,8 @@ public class ComplaintsControllerTest {
 		roomComp.setRoom("D15");
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(LocalDate.now());
 		roomComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -619,6 +621,7 @@ public class ComplaintsControllerTest {
 		// update dto
 		CreateRoomComplaintDto dto = new CreateRoomComplaintDto();
 		dto.setRoom("D16");
+		dto.setDescription("The electricity is not working");
 		dto.setRoomProb(RoomProb.ELECTRICITY);
 
 		//update the complaint body with patch
@@ -655,6 +658,7 @@ public class ComplaintsControllerTest {
 		CreateBuildingComplaintDto dto = new CreateBuildingComplaintDto();
 		dto.setBuilding("D");
 		dto.setBuildingProb(BuildingProb.ELECTRICITY);
+		dto.setDescription("There is no electricity in the building");
 
 		//update the complaint body with patch
 		mockMvc.perform(patch("/complaints/" + buildingComp.getId() + "/details")
@@ -675,6 +679,7 @@ public class ComplaintsControllerTest {
 		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
 		facilitiesComp.setComplainant(complainant2.getUser());
 		facilitiesComp.setDescription("The playground is broken");
+		facilitiesComp.setDate(LocalDate.now());
 		facilitiesComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -706,6 +711,8 @@ public class ComplaintsControllerTest {
 		roomComp.setRoom("D15");
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(LocalDate.now());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.RESOLVING);
 
@@ -729,12 +736,27 @@ public class ComplaintsControllerTest {
 
 	@Test
 	public void testDeleteComplaint_shouldReturnComplaintNotFound() throws Exception {
-		//delete the complaint
-		mockMvc.perform(delete("/complaints/" + 9999999)
+		// create a complaint
+		BuildingComplaint buildingComp = new BuildingComplaint();
+		buildingComp.setBuilding("E");
+		buildingComp.setStatus(ComplaintStatus.PENDING);
+		buildingComp.setDescription("There is no electricity in the building");
+		buildingComp.setBuildingProb(BuildingProb.SHOWER);
+		buildingComp.setComplainant(complainant.getUser());
+		buildingComp.setDate(LocalDate.now());
+
+		//save the complaint
+		buildingComp = buildingComplaintRepo.save(buildingComp);
+
+		//test delete the complaint
+		mockMvc.perform(delete("/complaints/" + buildingComp.getId() + 10) //the id is not correct
 						.with(user(complainant))
 						.contentType("application/json"))
 						.andExpect(status().isNotFound())
 						.andReturn();
+		
+		//delete the complaint
+		buildingComplaintRepo.deleteById(buildingComp.getId());
 	}
 	//End test delete complaint-----------------------------------------
 
