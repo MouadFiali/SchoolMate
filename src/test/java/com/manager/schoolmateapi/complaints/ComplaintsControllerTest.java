@@ -265,7 +265,7 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$.size()").value(1))
 						.andExpect(jsonPath("$[0].facilityType").value("PLAYGROUND"))
 						.andExpect(jsonPath("$[0].handler.lastName").value("Doe"))
-						.andExpect(jsonPath("$[0].complainant.lastName").value("Ross"))
+						.andExpect(jsonPath("$[0].complainant.lastName").value("Smith"))
 						.andExpect(jsonPath("$[0].status").value("RESOLVING"))
 						.andReturn();
 	}
@@ -281,7 +281,7 @@ public class ComplaintsControllerTest {
 						//First complaint
 						.andExpect(jsonPath("$[0].facilityType").value("PLAYGROUND"))
 						.andExpect(jsonPath("$[0].handler.lastName").value("Doe"))
-						.andExpect(jsonPath("$[0].complainant.lastName").value("Ross"))
+						.andExpect(jsonPath("$[0].complainant.lastName").value("Smith"))
 						.andExpect(jsonPath("$[0].status").value("RESOLVING"))
 						//Second complaint
 						.andExpect(jsonPath("$[1].facilityType").value("CLASS"))
@@ -321,6 +321,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setStatus(ComplaintStatus.PENDING);
+		roomComp.setDate(LocalDate.now());
 		roomComp.setDescription("The water is not working");
 
 		//save the complaint
