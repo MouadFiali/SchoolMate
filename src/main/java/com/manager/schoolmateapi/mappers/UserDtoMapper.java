@@ -17,6 +17,8 @@ public interface UserDtoMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "complaints", ignore = true)
+    @Mapping(target = "assignedComplaints", ignore = true)
     @Mapping(target = "documents", ignore = true)
     @Mapping(target = "tags", ignore = true)
     User createUserDtoToUser(CreateUserDto createUserDto);
@@ -24,6 +26,8 @@ public interface UserDtoMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "complaints", ignore = true)
+    @Mapping(target = "assignedComplaints", ignore = true)
     @Mapping(target = "documents", ignore = true)
     @Mapping(target = "tags", ignore = true)
     void updateUserFromDto(EditUserDto editUserDto, @MappingTarget User user);
@@ -35,6 +39,8 @@ public interface UserDtoMapper {
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "firstName", ignore = true)
     @Mapping(target = "lastName", ignore = true)
+    @Mapping(target = "complaints", ignore = true)
+    @Mapping(target = "assignedComplaints", ignore = true)
     @Mapping(target = "documents", ignore = true)
     @Mapping(target = "tags", ignore = true)
     void updatePasswordFromDto(EditPasswordDto editPasswordDto, @MappingTarget User user);

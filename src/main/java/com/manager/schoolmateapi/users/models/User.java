@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.manager.schoolmateapi.complaints.models.Complaint;
 import com.manager.schoolmateapi.documents.models.Document;
 import com.manager.schoolmateapi.documents.models.DocumentTag;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
@@ -41,7 +42,7 @@ public class User {
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
 
-	@Column(name = "email", nullable = false)
+	@Column(name = "email", nullable = false, unique = true)
 	private String email;
 
 	@Column(name = "password", nullable = false)
@@ -54,6 +55,14 @@ public class User {
 
 	@Column(name = "is_active", nullable = false)
 	private boolean isActive;
+
+	@OneToMany(mappedBy = "complainant", fetch = FetchType.EAGER)
+	@JsonIgnore
+	private Set<Complaint> complaints;
+
+	@OneToMany(mappedBy = "handler", fetch = FetchType.EAGER)
+	@JsonIgnore
+	private Set<Complaint> assignedComplaints;
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 	@JsonIgnore
