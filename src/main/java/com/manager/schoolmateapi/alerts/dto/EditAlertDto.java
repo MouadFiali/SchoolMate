@@ -27,6 +27,7 @@ public class EditAlertDto {
 
     @Nullable
     private Point coordinates;
+    
     @Nullable
     private AlertStatus status;
 }
