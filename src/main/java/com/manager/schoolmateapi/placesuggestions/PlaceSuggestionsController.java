@@ -25,7 +25,7 @@ public class PlaceSuggestionsController {
     PlaceSuggestionsService placesuggestionsService;
 
     @GetMapping(value = "/placesuggestions")
-    public Iterable<PlaceSuggestions> getAllUserAlerts(@AuthenticationPrincipal MyUserDetails userDetails) {
+    public Iterable<PlaceSuggestions> getAllUserPlaceSuggestions(@AuthenticationPrincipal MyUserDetails userDetails) {
         return placesuggestionsService.getAllUserPlaceSuggestions(userDetails.getUser());
     }
 
