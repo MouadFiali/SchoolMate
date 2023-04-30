@@ -1,6 +1,8 @@
 package com.manager.schoolmateapi.placesuggestions;
 
 import org.springframework.data.geo.Point;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.manager.schoolmateapi.placesuggestions.enumerations.PlaceSuggestionType;
 import com.manager.schoolmateapi.users.models.User;
 import jakarta.persistence.Column;
@@ -29,8 +31,9 @@ public class PlaceSuggestions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne( fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @Column(nullable = false)
@@ -41,6 +44,6 @@ public class PlaceSuggestions {
     private String description;
 
     @Column(nullable = false)
-    private Point location;
+    private Point coordinates;
 
 }
