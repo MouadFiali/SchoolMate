@@ -28,8 +28,8 @@ public class PlaceSuggestionsService {
         return PlaceSuggestionRepository.findByIdAndUser(id, user).orElseThrow(NOT_FOUND_HANDLER);
     }
 
-    public Iterable<PlaceSuggestions> getAllUserPlaceSuggestions(User user) {
-        return PlaceSuggestionRepository.findByUser(user);
+    public Iterable<PlaceSuggestions> getAllPlaceSuggestions() {
+        return PlaceSuggestionRepository.findAll();
     }
 
     public PlaceSuggestions addUserPlaceSuggestion(CreatePlaceSuggestionDto createPlaceSuggestionDto, User user) {
