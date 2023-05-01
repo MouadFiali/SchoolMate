@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -75,18 +76,6 @@ public class PlaceSuggestionsControllerTest{
             // save test user
             testUser1 = new MyUserDetails(userRepository.save(User1));
             testUser2 = new MyUserDetails(userRepository.save(User2));
-
-            // creating PlaceSuggestions
-            
-            // building a Place Suggestion
-            PlaceSuggestions suggestion = new PlaceSuggestions();
-            suggestion.setDescription("This is a description");
-            suggestion.setSuggestiontype(PlaceSuggestionType.StudyPlace);
-            suggestion.setCoordinates(new Point(1, 1));
-            suggestion.setUser(testUser1.getUser());
-
-            // save the test suggestion
-            placeSuggestionRepository.save(suggestion);
     }
 
         @Test // Testing the creation of a Place Suggestion with all of the required fields
@@ -109,33 +98,50 @@ public class PlaceSuggestionsControllerTest{
                                 .andReturn().getResponse().getContentAsString();
 
                 // Delete the Suggestion after the test
-                placeSuggestionRepository.deleteById(objectMapper.readValue(response, PlaceSuggestions.class).getId());
-
+                placeSuggestionRepository.deleteAll();
         }
-        @Test // test to get all place suggestions for a user
+        
+        @Test // test to get all place suggestions
         public void testGetAllPlaceSuggestions_shouldReturnListOfPlaceSuggestions() throws Exception {
-                CreatePlaceSuggestionDto placeSuggestionDto = CreatePlaceSuggestionDto.builder()
-                                .description("This is a test description")
-                                .suggestiontype(PlaceSuggestionType.Other)
-                                .coordinates(List.of(1.0, 1.0))
-                                .build();
-                mockMvc.perform(get("/placesuggestions")
-                                .with(user(testUser1))
-                                .contentType("application/json")
-                                .content(objectMapper.writeValueAsString(placeSuggestionDto)))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].description").value("This is a test description"))
-                                .andExpect(jsonPath("$[0].suggestiontype").value("Other"))
-                                .andExpect(jsonPath("$[0].coordinates.x").value(1.0))
-                                .andExpect(jsonPath("$[0].coordinates.y").value(1.0))
-                                .andReturn();
+
+                placeSuggestionRepository.deleteAll();
+
+                // building a Place Suggestion
+                 PlaceSuggestions suggestion = new PlaceSuggestions();
+                suggestion.setDescription("This is a description");
+                suggestion.setSuggestiontype(PlaceSuggestionType.StudyPlace);
+                suggestion.setCoordinates(new Point(1, 1));
+                suggestion.setUser(testUser1.getUser());
+
+                // building a Place Suggestion
+                PlaceSuggestions suggestion2 = new PlaceSuggestions();
+                suggestion2.setDescription("This is a description");
+                suggestion2.setSuggestiontype(PlaceSuggestionType.StudyPlace);
+                suggestion2.setCoordinates(new Point(1, 1));
+                suggestion2.setUser(testUser2.getUser());
+
+                // save the test suggestion
+                placeSuggestionRepository.save(suggestion);
+                placeSuggestionRepository.save(suggestion2);
+
+		mockMvc.perform(get("/placesuggestions?user=all")
+						.with(user(testUser1))
+						.contentType("application/json"))
+						.andExpect(status().isOk())
+                                                .andExpect(jsonPath("$.size()").value(2))
+						.andExpect(content().contentType("application/json"))
+                                                .andReturn();
+                
+                //Delete all afterwards
+                placeSuggestionRepository.deleteAll();
         }
 
         @Test // Testing Getting a Place Suggestion by ID
         public void testGetPlaceSuggestionById_shouldReturnPlaceSuggestion() throws Exception {
 
-                //creating a new Place Suggestion
+                placeSuggestionRepository.deleteAll();
 
+                //creating a new Place Suggestion
                 PlaceSuggestions suggestion = new PlaceSuggestions();
                 suggestion.setDescription("test suggestion description");
                 suggestion.setSuggestiontype(PlaceSuggestionType.StudyPlace);
@@ -145,19 +151,20 @@ public class PlaceSuggestionsControllerTest{
                 // save the test suggestion
                 suggestion = placeSuggestionRepository.save(suggestion);
 
-                mockMvc.perform(get("/placesuggestion/" + suggestion.getId())
-                                .with(user(testUser1))
-                                .contentType("application/json"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.id").value(suggestion.getId()))
-                                .andExpect(jsonPath("$.description").value(suggestion.getDescription()))
-                                .andExpect(jsonPath("$.suggestiontype").value(suggestion.getSuggestiontype().toString()))
-                                .andExpect(jsonPath("$.coordinates.x").value(suggestion.getCoordinates().getX()))
-                                .andExpect(jsonPath("$.coordinates.y").value(suggestion.getCoordinates().getY()))
-                                .andReturn();
+                mockMvc.perform(get("/placesuggestions/" + suggestion.getId())
+						.with(user(testUser1))
+						.contentType("application/json"))
+						.andExpect(status().isOk())
+						.andExpect(content().contentType("application/json"))
+						.andExpect(jsonPath("$.id").value(suggestion.getId()))
+                                                .andExpect(jsonPath("$.description").value("test suggestion description"))
+                                                .andExpect(jsonPath("$.suggestiontype").value("StudyPlace"))
+                                                .andExpect(jsonPath("$.coordinates.x").value(1.0))
+                                                .andExpect(jsonPath("$.coordinates.x").value(1.0))
+						.andReturn();
 
                 // Delete the suggestion after the test
-                placeSuggestionRepository.deleteById(suggestion.getId());
+                placeSuggestionRepository.deleteAll();
         }
 
         // test suggestion by id not found
@@ -171,6 +178,8 @@ public class PlaceSuggestionsControllerTest{
 
         @Test // testing updating a suggestion
         public void testUpdatePlaceSuggestion_shouldReturnUpdatedPlaceSuggestion() throws Exception {
+
+                placeSuggestionRepository.deleteAll();
 
                 // creating a new suggestion
                 PlaceSuggestions suggestion = new PlaceSuggestions();
@@ -193,18 +202,17 @@ public class PlaceSuggestionsControllerTest{
                 mockMvc.perform(patch("/placesuggestions/" + suggestion.getId())
                                 .with(user(testUser1))
                                 .contentType("application/json")
-                                // .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(editPlaceSuggestionDto)))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.id").value(suggestion.getId()))
-                                .andExpect(jsonPath("$.description").value("updated suggested description"))
+                                .andExpect(jsonPath("$.description").value("updated suggestion description"))
                                 .andExpect(jsonPath("$.suggestiontype").value("Other"))
                                 .andExpect(jsonPath("$.coordinates.x").value(2.0))
                                 .andExpect(jsonPath("$.coordinates.x").value(2.0))
                                 .andReturn();
                                 
                 // Delete the suggestion after the test
-                placeSuggestionRepository.deleteById(suggestion.getId());
+                placeSuggestionRepository.deleteAll();
         }
 
           // testing deleting a place suggestion
