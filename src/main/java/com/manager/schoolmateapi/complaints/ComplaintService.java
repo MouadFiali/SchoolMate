@@ -69,7 +69,7 @@ public class ComplaintService {
   }
 
   // Get paginated room complaints
-  public Page<RoomComplaint> getAllRoomComplaints(Pageable pageable) {
+  public Page<RoomComplaint> getAllRoomComplaintsPaginated(Pageable pageable) {
     return roomComplaintRepo.findAll(pageable);
   }
 
@@ -78,7 +78,7 @@ public class ComplaintService {
   }
 
   // Get paginated room complaints by user
-  public Page<RoomComplaint> getAllRoomComplaintsByUser(Long id, Pageable pageable) {
+  public Page<RoomComplaint> getAllRoomComplaintsByUserPaginated(Long id, Pageable pageable) {
     return roomComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
@@ -87,7 +87,7 @@ public class ComplaintService {
   }
 
   // Get paginated building complaints
-  public Page<BuildingComplaint> getAllBuildingComplaints(Pageable pageable) {
+  public Page<BuildingComplaint> getAllBuildingComplaintsPaginated(Pageable pageable) {
     return buildingComplaintRepo.findAll(pageable);
   }
 
@@ -96,7 +96,7 @@ public class ComplaintService {
   }
 
   // Get paginated building complaints by user
-  public Page<BuildingComplaint> getAllBuildingComplaintsByUser(Long id, Pageable pageable) {
+  public Page<BuildingComplaint> getAllBuildingComplaintsByUserPaginated(Long id, Pageable pageable) {
     return buildingComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
@@ -105,7 +105,7 @@ public class ComplaintService {
   }
 
   // Get paginated facilities complaints
-  public Page<FacilitiesComplaint> getAllFacilitiesComplaints(Pageable pageable) {
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsPaginated(Pageable pageable) {
     return facilitiesComplaintRepo.findAll(pageable);
   }
 
@@ -114,7 +114,7 @@ public class ComplaintService {
   }
 
   // Get paginated facilities complaints by user
-  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByUser(Long id, Pageable pageable) {
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByUserPaginated(Long id, Pageable pageable) {
     return facilitiesComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
@@ -123,7 +123,7 @@ public class ComplaintService {
   }
 
   // Get paginated complaints (all types)
-  public Page<Complaint> getAllComplaints(Pageable pageable) {
+  public Page<Complaint> getAllComplaintsPaginated(Pageable pageable) {
     return complaintRepo.findAll(pageable);
   }
 
@@ -132,7 +132,7 @@ public class ComplaintService {
   }
 
   // Get paginated complaints by user (all types)
-  public Page<Complaint> getAllComplaintsByUser(Long id, Pageable pageable) {
+  public Page<Complaint> getAllComplaintsByUserPaginated(Long id, Pageable pageable) {
     return complaintRepo.findAllByComplainantId(id, pageable);
   }
 
