@@ -2,6 +2,7 @@ package com.manager.schoolmateapi.complaints;
 
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,13 +76,6 @@ public class ComplaintsControllerTest {
     @BeforeAll
 	@Transactional
 	void setup() {
-		// Clear the database
-		buildingComplaintRepo.deleteAll();
-		facilitiesComplaintRepo.deleteAll();
-		roomComplaintRepo.deleteAll();
-		userRepository.deleteAll();
-
-	
 		// Create a test user (complainant)
 		User userComplainant = new User();
 		userComplainant.setFirstName("John");
@@ -174,10 +169,10 @@ public class ComplaintsControllerTest {
 
 		String response = mockMvc.perform(post("/complaints")
 						.with(user(complainant))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isCreated())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						.andExpect(jsonPath("$.building").value("B"))
 						.andExpect(jsonPath("$.buildingProb").value("SHOWER"))
 						.andExpect(jsonPath("$.handler").value(IsNull.nullValue()))
@@ -200,10 +195,10 @@ public class ComplaintsControllerTest {
 
 		mockMvc.perform(post("/complaints")
 						.with(user(complainant))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isBadRequest())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						.andExpect(jsonPath("$.errors").value("The facility type is required"))
 						.andReturn();
 	}
@@ -217,10 +212,10 @@ public class ComplaintsControllerTest {
 
 		mockMvc.perform(post("/complaints")
 						.with(user(complainant))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isBadRequest())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						.andExpect(jsonPath("$.errors").value("The class name should not be empty if the facility type is a class"))
 						.andReturn();
 	}
@@ -229,96 +224,134 @@ public class ComplaintsControllerTest {
 	//Test get complaint by type----------------------------------------
 	@Test //Test get building complaints of all users
 	public void testGetBuildingComplaints_shouldReturnAllBuildingComps() throws Exception {
+		int pageSize = 1;
+		int page = 0;
+
 		mockMvc.perform(get("/complaints?type=building")
 						.with(user(complainant))
-						.contentType("application/json"))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.size()").value(1))
-						.andExpect(jsonPath("$[0].building").value("A"))
-						.andExpect(jsonPath("$[0].buildingProb").value("ELECTRICITY"))
-						.andExpect(jsonPath("$[0].handler").value(IsNull.nullValue()))
-						.andExpect(jsonPath("$[0].status").value("PENDING"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						.andExpect(jsonPath("$.results").value(Matchers.hasSize(pageSize)))
+						.andExpect(jsonPath("$.results[0].building").value("A"))
+						.andExpect(jsonPath("$.results[0].buildingProb").value("ELECTRICITY"))
+						.andExpect(jsonPath("$.results[0].handler").value(IsNull.nullValue()))
+						.andExpect(jsonPath("$.results[0].status").value("PENDING"))
 						.andReturn();
 	}
 
 	@Test //Test get facilities complaints of a specific user
 	public void testGetFacilitiesComplaints_shouldReturnFacilitiesCompsForUser() throws Exception {
+		int pageSize = 1;
+		int page = 0;
+
 		mockMvc.perform(get("/complaints?type=facilities&user=me")
 						.with(user(complainant))
-						.contentType("application/json"))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.size()").value(1))
-						.andExpect(jsonPath("$[0].facilityType").value("PLAYGROUND"))
-						.andExpect(jsonPath("$[0].handler.lastName").value("Doe"))
-						.andExpect(jsonPath("$[0].complainant.lastName").value("Smith"))
-						.andExpect(jsonPath("$[0].status").value("RESOLVING"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						.andExpect(jsonPath("$.results").value(Matchers.hasSize(pageSize)))
+						.andExpect(jsonPath("$.results[0].facilityType").value("PLAYGROUND"))
+						.andExpect(jsonPath("$.results[0].handler.lastName").value("Doe"))
+						.andExpect(jsonPath("$.results[0].complainant.lastName").value("Smith"))
+						.andExpect(jsonPath("$.results[0].status").value("RESOLVING"))
 						.andReturn();
 	}
 
 	@Test //Test get facilities complaints of all users
 	public void testGetFacilitiesComplaints_shouldReturnFacilitiesCompsForAll() throws Exception {
+		int pageSize = 1;
+		int page = 0;
+
 		mockMvc.perform(get("/complaints?type=facilities&user=all")
 						.with(user(complainant))
-						.contentType("application/json"))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.size()").value(2))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						.andExpect(jsonPath("$.results").value(Matchers.hasSize(pageSize)))
+						// We have 2 complaints, every page has 1 complaint as we set the page size to 1 -> so we have 2 pages
+						.andExpect(jsonPath("$.totalPages").value(2))
 						//First complaint
-						.andExpect(jsonPath("$[0].facilityType").value("PLAYGROUND"))
-						.andExpect(jsonPath("$[0].handler.lastName").value("Doe"))
-						.andExpect(jsonPath("$[0].complainant.lastName").value("Smith"))
-						.andExpect(jsonPath("$[0].status").value("RESOLVING"))
+						.andExpect(jsonPath("$.results[0].facilityType").value("PLAYGROUND"))
+						.andExpect(jsonPath("$.results[0].handler.lastName").value("Doe"))
+						.andExpect(jsonPath("$.results[0].complainant.lastName").value("Smith"))
+						.andReturn();
+		
+		// get second page
+		page = 1;
+		mockMvc.perform(get("/complaints?type=facilities&user=all")
+						.with(user(complainant))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						.andExpect(jsonPath("$.results").value(Matchers.hasSize(pageSize)))
 						//Second complaint
-						.andExpect(jsonPath("$[1].facilityType").value("CLASS"))
-						.andExpect(jsonPath("$[1].handler.lastName").value("Doe"))
-						.andExpect(jsonPath("$[1].complainant.lastName").value("Ross"))
-						.andExpect(jsonPath("$[1].status").value("CONFIRMED"))
+						.andExpect(jsonPath("$.results[0].facilityType").value("CLASS"))
+						.andExpect(jsonPath("$.results[0].handler.lastName").value("Doe"))
+						.andExpect(jsonPath("$.results[0].complainant.lastName").value("Ross"))
+						.andExpect(jsonPath("$.results[0].status").value("CONFIRMED"))
 						.andReturn();
 	}
 
 	@Test //Test get all complaints of a specific user
 	public void testGetAllComplaints_shouldReturnAllComplaintsForUser() throws Exception{
+		int pageSize = 3; // We have 3 complaints
+		int page = 0;
+
 		mockMvc.perform(get("/complaints?user=me") // or /complaints?type=all&user=me
 						.with(user(complainant)) //John Smith
-						.contentType("application/json"))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.size()").value(3))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						.andExpect(jsonPath("$.results").value(Matchers.hasSize(pageSize)))
 						//First complaint
-						.andExpect(jsonPath("$[0].building").value("A"))
-						.andExpect(jsonPath("$[0].complainant.lastName").value("Smith"))
+						.andExpect(jsonPath("$.results[0].building").value("A"))
+						.andExpect(jsonPath("$.results[0].complainant.lastName").value("Smith"))
 						//Second complaint
-						.andExpect(jsonPath("$[1].room").value("C36"))
-						.andExpect(jsonPath("$[1].complainant.lastName").value("Smith"))
+						.andExpect(jsonPath("$.results[1].room").value("C36"))
+						.andExpect(jsonPath("$.results[1].complainant.lastName").value("Smith"))
 						//Third complaint
-						.andExpect(jsonPath("$[2].facilityType").value("PLAYGROUND"))
-						.andExpect(jsonPath("$[2].complainant.lastName").value("Smith"))
+						.andExpect(jsonPath("$.results[2].facilityType").value("PLAYGROUND"))
+						.andExpect(jsonPath("$.results[2].complainant.lastName").value("Smith"))
 						.andReturn();
 	}
 
 	
 	@Test //Test get all complaints of all users
 	public void testGetAllComplaints_shouldReturnAllComplaintsForAll() throws Exception{
+		int pageSize = 4; // We have 4 complaints
+		int page = 0;
+
 		mockMvc.perform(get("/complaints") // or /complaints?type=all?user=all or /complaints?type=all
 						.with(user(complainant)) //John Smith
-						.contentType("application/json"))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.size()").value(4))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						.andExpect(jsonPath("$.results").value(Matchers.hasSize(pageSize)))
 						//First complaint
-						.andExpect(jsonPath("$[0].building").value("A"))
-						.andExpect(jsonPath("$[0].complainant.lastName").value("Smith"))
+						.andExpect(jsonPath("$.results[0].building").value("A"))
+						.andExpect(jsonPath("$.results[0].complainant.lastName").value("Smith"))
 						//Second complaint
-						.andExpect(jsonPath("$[1].room").value("C36"))
-						.andExpect(jsonPath("$[1].complainant.lastName").value("Smith"))
+						.andExpect(jsonPath("$.results[1].room").value("C36"))
+						.andExpect(jsonPath("$.results[1].complainant.lastName").value("Smith"))
 						//Third complaint
-						.andExpect(jsonPath("$[2].facilityType").value("PLAYGROUND"))
-						.andExpect(jsonPath("$[2].complainant.lastName").value("Smith"))
+						.andExpect(jsonPath("$.results[2].facilityType").value("PLAYGROUND"))
+						.andExpect(jsonPath("$.results[2].complainant.lastName").value("Smith"))
 						//Fourth complaint
-						.andExpect(jsonPath("$[3].facilityType").value("CLASS"))
-						.andExpect(jsonPath("$[3].complainant.lastName").value("Ross"))
+						.andExpect(jsonPath("$.results[3].facilityType").value("CLASS"))
+						.andExpect(jsonPath("$.results[3].complainant.lastName").value("Ross"))
 						.andReturn();
 	}
 	//End test get complaint by type------------------------------------
@@ -341,9 +374,9 @@ public class ComplaintsControllerTest {
 		//get the complaint by id
 		mockMvc.perform(get("/complaints/" + roomComp.getId())
 						.with(user(complainant))
-						.contentType("application/json"))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						.andExpect(jsonPath("$.room").value("D15"))
 						.andExpect(jsonPath("$.roomProb").value("WATER"))
 						.andExpect(jsonPath("$.complainant.lastName").value("Smith"))
@@ -358,7 +391,7 @@ public class ComplaintsControllerTest {
 	public void testGetComplaintById_notFound() throws Exception {
 		mockMvc.perform(get("/complaints/999999999")
 						.with(user(complainant))
-						.contentType("application/json"))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isNotFound())
 						.andReturn();
 	}
@@ -388,15 +421,21 @@ public class ComplaintsControllerTest {
 		roomComp = roomComplaintRepo.save(roomComp);
 		roomComp2 = roomComplaintRepo.save(roomComp2);
 
+		int pageSize = 5;
+		int page = 0;
+
 		//get the complaints of complainant 2
 		mockMvc.perform(get("/complaints?type=room&user=" + complainant2.getUser().getId())
 						.with(user(complainant))
-						.contentType("application/json"))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
-						.andExpect(jsonPath("$.size()").value(2))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						//Check if the size of the results is less than the page size (We are not sure how many complaints the user has for example)
+						.andExpect(jsonPath("$.results", Matchers.hasSize(Matchers.lessThan(pageSize))))
 						//Check if all the complaints has the same user Ross
-						.andExpect(jsonPath("$[*].complainant.lastName", Matchers.everyItem(Matchers.is("Ross"))))
+						.andExpect(jsonPath("$.results[*].complainant.lastName", Matchers.everyItem(Matchers.is("Ross"))))
 						.andReturn();
 
 		//delete the complaints
@@ -437,16 +476,21 @@ public class ComplaintsControllerTest {
 		roomComp2 = roomComplaintRepo.save(roomComp2);
 		buildingComp = buildingComplaintRepo.save(buildingComp);
 
+		int pageSize = 4;
+		int page = 0;
+
 		//get the complaints of complainant 2
 		mockMvc.perform(get("/complaints?user=" + complainant2.getUser().getId())
 						.with(user(complainant))
-						.contentType("application/json"))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						// 2 room complaints, 1 building complaint and 1 facility complaint = 4
-						.andExpect(jsonPath("$.size()").value(4))
+						.andExpect(jsonPath("$.results", Matchers.hasSize(pageSize)))
 						//Check if all the complaints has the same user Ross
-						.andExpect(jsonPath("$[*].complainant.lastName", Matchers.everyItem(Matchers.is("Ross"))))
+						.andExpect(jsonPath("$.results[*].complainant.lastName", Matchers.everyItem(Matchers.is("Ross"))))
 						.andReturn();
 
 		//delete the complaints
@@ -455,6 +499,19 @@ public class ComplaintsControllerTest {
 		buildingComplaintRepo.deleteById(buildingComp.getId());
 
 	}
+
+	@Test //try to get complaints of a specific user with invalid user id (not a number)
+	public void testGetComplaintOfUserWithInvalidUserId_shouldReturnBadRequest() throws Exception {
+		//get the complaints of complainant 2
+		mockMvc.perform(get("/complaints?type=room&user=invalid")
+						.with(user(complainant))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isBadRequest())
+						.andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+						.andExpect(jsonPath("$.detail", Matchers.is("Invalid user parameter")))
+						.andReturn();
+	}
+
 	//End test get complaint of a specific user--------------------------
 
 	//Test update complaint specs---------------------------------------------
@@ -480,10 +537,10 @@ public class ComplaintsControllerTest {
 		//update the complaint status with patch
 		mockMvc.perform(patch("/complaints/" + roomComp.getId() + "/handling")
 						.with(user(handler))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						.andExpect(jsonPath("$.status").value("RESOLVED"))
 						.andReturn();
 
@@ -513,7 +570,7 @@ public class ComplaintsControllerTest {
 		//update the complaint status with patch
 		mockMvc.perform(patch("/complaints/" + roomComp.getId() + "/handling")
 						.with(user(complainant))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isForbidden())
 						.andReturn();
@@ -543,10 +600,10 @@ public class ComplaintsControllerTest {
 		//update the complaint handler with patch (the handler is the user that is logged in)
 		mockMvc.perform(patch("/complaints/" + buildingComp.getId() + "/handling")
 						.with(user(handler))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						.andExpect(jsonPath("$.handler.id").value(handler.getUser().getId()))
 						//the status should be changed to ASSIGNED because the handler is not null anymore
 						.andExpect(jsonPath("$.status").value("ASSIGNED"))
@@ -576,10 +633,10 @@ public class ComplaintsControllerTest {
 		//update the complaint status with patch
 		mockMvc.perform(patch("/complaints/" + facilitiesComp.getId() + "/handling")
 						.with(user(handler))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isBadRequest())
-						.andExpect(content().contentType("application/problem+json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
 						.andExpect(jsonPath("$.detail").value("Complaint must be assigned to a handler before changing the status"))
 						.andReturn();
 
@@ -613,10 +670,10 @@ public class ComplaintsControllerTest {
 		//update the complaint body with patch
 		mockMvc.perform(patch("/complaints/" + roomComp.getId() + "/details")
 						.with(user(complainant))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isOk())
-						.andExpect(content().contentType("application/json"))
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 						.andExpect(jsonPath("$.room").value("D16"))
 						.andExpect(jsonPath("$.roomProb").value("ELECTRICITY"))
 						.andReturn();
@@ -649,7 +706,7 @@ public class ComplaintsControllerTest {
 		//update the complaint body with patch
 		mockMvc.perform(patch("/complaints/" + buildingComp.getId() + "/details")
 						.with(user(complainant))
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isForbidden())
 						.andReturn();
@@ -679,7 +736,7 @@ public class ComplaintsControllerTest {
 		//update the complaint body with patch
 		mockMvc.perform(patch("/complaints/" + facilitiesComp.getId() + "/details")
 						.with(user(complainant)) // complainant is not the owner of the complaint
-						.contentType("application/json")
+						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(dto)))
 						.andExpect(status().isForbidden())
 						.andReturn();
@@ -708,14 +765,14 @@ public class ComplaintsControllerTest {
 		//delete the complaint
 		mockMvc.perform(delete("/complaints/" + roomComp.getId())
 						.with(user(complainant))
-						.contentType("application/json"))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isOk())
 						.andReturn();
 
 		//check if the complaint is deleted
 		mockMvc.perform(get("/complaints/" + roomComp.getId())
 						.with(user(complainant))
-						.contentType("application/json"))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isNotFound())
 						.andReturn();
 	}
@@ -737,7 +794,7 @@ public class ComplaintsControllerTest {
 		//test delete the complaint
 		mockMvc.perform(delete("/complaints/" + buildingComp.getId() + 10) //the id is not correct
 						.with(user(complainant))
-						.contentType("application/json"))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isNotFound())
 						.andReturn();
 		
@@ -761,7 +818,7 @@ public class ComplaintsControllerTest {
 		//delete the complaint
 		mockMvc.perform(delete("/complaints/" + facilitiesComp.getId())
 						.with(user(complainant)) // complainant is not the owner of the complaint
-						.contentType("application/json"))
+						.contentType(MediaType.APPLICATION_JSON))
 						.andExpect(status().isForbidden())
 						.andReturn();
 
@@ -771,5 +828,13 @@ public class ComplaintsControllerTest {
 
 	//End test delete complaint-----------------------------------------
 
+	// Clean up database after all tests
+	@AfterAll
+	public void cleanUp() {
+		roomComplaintRepo.deleteAll();
+		facilitiesComplaintRepo.deleteAll();
+		buildingComplaintRepo.deleteAll();
+		userRepository.deleteAll();
+	}
 
 }
