@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -66,32 +68,72 @@ public class ComplaintService {
       return roomComplaintRepo.findAll();
   }
 
+  // Get paginated room complaints
+  public Page<RoomComplaint> getAllRoomComplaints(Pageable pageable) {
+    return roomComplaintRepo.findAll(pageable);
+  }
+
   public Iterable<RoomComplaint> getAllRoomComplaintsByUser(Long id) {
     return roomComplaintRepo.findAllByComplainantId(id);
+  }
+
+  // Get paginated room complaints by user
+  public Page<RoomComplaint> getAllRoomComplaintsByUser(Long id, Pageable pageable) {
+    return roomComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
   public Iterable<BuildingComplaint> getAllBuildingComplaints() {
       return buildingComplaintRepo.findAll();
   }
 
+  // Get paginated building complaints
+  public Page<BuildingComplaint> getAllBuildingComplaints(Pageable pageable) {
+    return buildingComplaintRepo.findAll(pageable);
+  }
+
   public Iterable<BuildingComplaint> getAllBuildingComplaintsByUser(Long id) {
     return buildingComplaintRepo.findAllByComplainantId(id);
+  }
+
+  // Get paginated building complaints by user
+  public Page<BuildingComplaint> getAllBuildingComplaintsByUser(Long id, Pageable pageable) {
+    return buildingComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
   public Iterable<FacilitiesComplaint> getAllFacilitiesComplaints() {
       return facilitiesComplaintRepo.findAll();
   }
 
+  // Get paginated facilities complaints
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaints(Pageable pageable) {
+    return facilitiesComplaintRepo.findAll(pageable);
+  }
+
   public Iterable<FacilitiesComplaint> getAllFacilitiesComplaintsByUser(Long id) {
     return facilitiesComplaintRepo.findByComplainantId(id);
+  }
+
+  // Get paginated facilities complaints by user
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByUser(Long id, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
   public Iterable<Complaint> getAllComplaints() {
     return complaintRepo.findAll();
   }
 
+  // Get paginated complaints (all types)
+  public Page<Complaint> getAllComplaints(Pageable pageable) {
+    return complaintRepo.findAll(pageable);
+  }
+
   public Iterable<Complaint> getAllComplaintsByUser(Long id) {
     return complaintRepo.findAllByComplainantId(id);
+  }
+
+  // Get paginated complaints by user (all types)
+  public Page<Complaint> getAllComplaintsByUser(Long id, Pageable pageable) {
+    return complaintRepo.findAllByComplainantId(id, pageable);
   }
 
   public Complaint getComplaint(Long id){
