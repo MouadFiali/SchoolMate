@@ -53,8 +53,18 @@ public class DocumentsService {
   };
 
   @Transactional
-  public Document getDocumentById(long documentId, User user) {
+  public Document getDocumentByIdAndUser(long documentId, User user) {
     return documentsRepository.findByIdAndUser(documentId, user).orElseThrow(DOCUMENT_NOT_FOUND_HANDLER);
+  }
+
+  @Transactional
+  public Document getDocumentForDownload(long documentId, User user) {
+    Document document = documentsRepository.findById(documentId).orElseThrow(DOCUMENT_NOT_FOUND_HANDLER);
+    if (document.isShared() || document.getUser().getId().equals(user.getId())) {
+      return document;
+    } else {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
+    }
   }
 
   @Transactional
