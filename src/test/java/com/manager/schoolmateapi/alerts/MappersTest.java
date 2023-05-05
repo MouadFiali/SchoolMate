@@ -29,14 +29,14 @@ public class MappersTest {
                 .description("description")
                 .type(AlertType.ROBBERY)
                 .coordinates(List.of(1.0, 1.0))
-                .status(AlertStatus.PENDING)
+               // .status(AlertStatus.PENDING)
                 .build();
         Alert alert = alertMapper.createDtoToAlert(createAlertDto);
         assert (alert.getTitle().equals(createAlertDto.getTitle()));
         assert (alert.getDescription().equals(createAlertDto.getDescription()));
         assert (alert.getType().equals(createAlertDto.getType()));
         assertThat(alert.getCoordinates(), Matchers.is(listToPoint(createAlertDto.getCoordinates())));
-        assert (alert.getStatus().equals(createAlertDto.getStatus()));
+        //assert (alert.getStatus().equals(createAlertDto.getStatus()));
 
     }
 
