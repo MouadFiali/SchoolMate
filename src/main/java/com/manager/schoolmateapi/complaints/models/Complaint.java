@@ -50,4 +50,7 @@ public class Complaint {
     @JoinColumn(name = "handler")
     private User handler;
 
+    // Show the dtype (that is set automatically by Hibernate)
+    @Column(insertable = false, updatable = false)
+    private String dtype;
 }
