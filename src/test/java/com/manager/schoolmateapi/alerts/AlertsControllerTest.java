@@ -75,7 +75,7 @@ public class AlertsControllerTest {
                 anotherUser.setFirstName("Mehdi");
                 anotherUser.setLastName("essalehi");
                 anotherUser.setRole(UserRole.STUDENT);
-                anotherUser.setPassword("123456A@");
+                anotherUser.setPassword("123456A@");//
                 anotherUser.setEmail("mehdi.essalehi@gmail.com");
                 anotherUser.setActive(true);
 
@@ -103,7 +103,7 @@ public class AlertsControllerTest {
                                 .description("test alert description")
                                 .type(AlertType.DANGER)
                                 .coordinates(List.of(1.0, 1.0))
-                                .status(AlertStatus.PENDING)
+                                //.status(AlertStatus.PENDING)
                                 .build();
 
                 String response = mockMvc.perform(post("/alerts")
@@ -130,7 +130,7 @@ public class AlertsControllerTest {
                                 .description("test alert description")
                                 .type(AlertType.DANGER)
                                 .coordinates(List.of(1.0, 1.0))
-                                .status(AlertStatus.PENDING)
+                                //.status(AlertStatus.PENDING)
                                 .build();
                 mockMvc.perform(get("/alerts")
                                 .with(user(testUser))

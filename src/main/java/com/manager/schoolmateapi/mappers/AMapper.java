@@ -21,6 +21,7 @@ public interface AMapper {
     @Mapping(source = "coordinates", target = "coordinates", qualifiedByName = "ListToPoint")
     @Mapping(target = "id", ignore = true)
     @Mapping(target="user", ignore= true)
+    @Mapping(target="status", ignore= true)
     Alert createDtoToAlert(CreateAlertDto createAlertDto);
 
      @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
