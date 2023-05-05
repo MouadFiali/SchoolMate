@@ -828,6 +828,30 @@ public class ComplaintsControllerTest {
 
 	//End test delete complaint-----------------------------------------
 
+	// Test if the dtype is sent correctly-----------------------------------------
+	@Test
+	public void testDTypeOfComplaint_shouldReturnCorrectDType() throws Exception {
+		// create a complaint
+		FacilitiesComplaint facilitiesComp = new FacilitiesComplaint();
+		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
+		facilitiesComp.setComplainant(complainant2.getUser());
+		facilitiesComp.setDescription("The playground is broken");
+		facilitiesComp.setDate(LocalDate.now());
+		facilitiesComp.setStatus(ComplaintStatus.PENDING);
+
+		//save the complaint
+		facilitiesComp = facilitiesComplaintRepo.save(facilitiesComp);
+
+		// get the complaint by id and check if the dtype is correct
+		mockMvc.perform(get("/complaints/" + facilitiesComp.getId())
+						.with(user(complainant2))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$.dtype").value("FacilitiesComplaint"))
+						.andReturn();
+
+	}
+
 	// Clean up database after all tests
 	@AfterAll
 	public void cleanUp() {
