@@ -527,6 +527,47 @@ public class DocumentsControllerTest {
 	}
 
 	@Test
+	public void testDocumentDownload_givenAnotherUserSharedDocumentId_shouldReturnFileBytes() throws Exception {
+		Document doc = documentsRepository.save(
+				Document
+						.builder()
+						.name("PostgreSQL Cheatsheet")
+						.shared(true)
+						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
+						.user(testUser.getUser())
+						.build());
+
+		mockMvc
+				.perform(
+						get(String.format("/documents/%d/file", doc.getId()))
+								.with(user(anotherTestUser)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_OCTET_STREAM))
+				.andExpect(content().bytes(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH))));
+	}
+
+	@Test
+	public void testDocumentDownload_givenAnotherUserUnsharedDocumentId_shouldReturnNotFound() throws Exception {
+		Document doc = documentsRepository.save(
+				Document
+						.builder()
+						.name("PostgreSQL Cheatsheet")
+						.shared(false)
+						.file(Files.readAllBytes(Paths.get(DUMMY_PDF_PATH)))
+						.tags(documentTagsRepository.findAllById(userCreatedTagsIds).stream().collect(Collectors.toSet()))
+						.user(testUser.getUser())
+						.build());
+
+		mockMvc
+				.perform(
+						get(String.format("/documents/%d/file", doc.getId()))
+								.with(user(anotherTestUser)))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+	}
+
+	@Test
 	public void testAddTag_shouldReturnNewTag() throws Exception {
 		CreateDocumentTagDto cTagDto = CreateDocumentTagDto.builder().name("PFA").build();
 

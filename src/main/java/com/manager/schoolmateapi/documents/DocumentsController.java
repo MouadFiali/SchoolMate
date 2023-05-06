@@ -82,7 +82,7 @@ public class DocumentsController {
 
   @GetMapping("/{id}")
   public Document getUserDocument(@AuthenticationPrincipal MyUserDetails userDetails, @PathVariable long id) {
-    return documentsService.getDocumentById(id, userDetails.getUser());
+    return documentsService.getDocumentByIdAndUser(id, userDetails.getUser());
   }
 
   @PatchMapping("/{id}")
@@ -101,7 +101,7 @@ public class DocumentsController {
   public ResponseEntity<byte[]> downloadUserDocument(
       @AuthenticationPrincipal MyUserDetails userDetails,
       @PathVariable long id) {
-    Document document = documentsService.getDocumentById(id, userDetails.getUser());
+    Document document = documentsService.getDocumentForDownload(id, userDetails.getUser());
 
     byte[] file = document.getFile();
 
