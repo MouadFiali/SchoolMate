@@ -179,9 +179,11 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$.complainant.lastName").value("Smith"))
 						.andExpect(jsonPath("$.status").value("PENDING"))
 						.andExpect(jsonPath("$.date").value(LocalDate.now().toString()))
+						.andExpect(jsonPath("$.dtype").value("BuildingComplaint")) // check that the dtype is not null and is set to BuildingComplaint
 						.andExpect(jsonPath("$.description").value("The building does not have hot water"))
 						.andReturn().getResponse().getContentAsString();
 		
+	
 		// Delete the complaint from the database after the test 
 		long id = ((Number) JsonPath.parse(response).read("$.id")).longValue();
 		buildingComplaintRepo.deleteById(id);
