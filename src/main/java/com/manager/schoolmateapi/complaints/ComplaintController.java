@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -42,19 +43,22 @@ public class ComplaintController {
     private ComplaintService complaintService;
 
     @PostMapping("/complaints")
-    ResponseEntity<?> addComplaint(@Valid @RequestBody CreateComplaintDto createComplaintDto, @AuthenticationPrincipal MyUserDetails userDetails) {
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+    @ResponseStatus(HttpStatus.CREATED)
+    Complaint addComplaint(@Valid @RequestBody CreateComplaintDto createComplaintDto, @AuthenticationPrincipal MyUserDetails userDetails) {
         if(createComplaintDto instanceof CreateBuildingComplaintDto){
-            Complaint complaint = complaintService.addBuildingComplaint((CreateBuildingComplaintDto) createComplaintDto, userDetails.getUser());
-            return ResponseEntity.created(location).body(complaint);
+            BuildingComplaint complaint = complaintService.addBuildingComplaint((CreateBuildingComplaintDto) createComplaintDto, userDetails.getUser());
+            complaint.setDtype("BuildingComplaint"); // TODO: find a better way to do this
+            return complaint;
         } else if(createComplaintDto instanceof CreateRoomComplaintDto){
-            Complaint complaint = complaintService.addRoomComplaint((CreateRoomComplaintDto) createComplaintDto, userDetails.getUser());
-            return ResponseEntity.created(location).body(complaint);
+            RoomComplaint complaint = complaintService.addRoomComplaint((CreateRoomComplaintDto) createComplaintDto, userDetails.getUser());
+            complaint.setDtype("RoomComplaint"); // set the discriminator value manually as it's not set yet by hibernate
+            return complaintService.getComplaint(complaint.getId());
         } else if(createComplaintDto instanceof CreateFacilityComplaintDto){
-            Complaint complaint = complaintService.addFacilitiesComplaint((CreateFacilityComplaintDto) createComplaintDto, userDetails.getUser());
-            return ResponseEntity.created(location).body(complaint);
+            FacilitiesComplaint complaint = complaintService.addFacilitiesComplaint((CreateFacilityComplaintDto) createComplaintDto, userDetails.getUser());
+            complaint.setDtype("FacilitiesComplaint"); // TODO: find a better way to do this
+            return complaintService.getComplaint(complaint.getId());
         } else {
-            return ResponseEntity.badRequest().body(new MessageResponse("Invalid complaint type"));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid complaint type");
         }
     }
 
