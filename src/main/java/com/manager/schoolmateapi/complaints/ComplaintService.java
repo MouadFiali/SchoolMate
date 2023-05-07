@@ -1,6 +1,5 @@
 package com.manager.schoolmateapi.complaints;
 
-import java.time.LocalDate;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,7 +144,6 @@ public class ComplaintService {
 
     // Set the status to pending and the date to today
     roomComplaint.setStatus(ComplaintStatus.PENDING);
-    roomComplaint.setDate(LocalDate.now());
     roomComplaint.setComplainant(complainant);
 
     return roomComplaintRepo.save(roomComplaint);
@@ -156,7 +154,6 @@ public class ComplaintService {
 
     // Set the status to pending and the date to today
     buildingComplaint.setStatus(ComplaintStatus.PENDING);
-    buildingComplaint.setDate(LocalDate.now());
     buildingComplaint.setComplainant(complainant);
 
     return buildingComplaintRepo.save(buildingComplaint);
@@ -167,7 +164,6 @@ public class ComplaintService {
 
     // Set the status to pending and the date to today
     facilitiesComplaint.setStatus(ComplaintStatus.PENDING);
-    facilitiesComplaint.setDate(LocalDate.now());
     facilitiesComplaint.setComplainant(complainant);
 
     return facilitiesComplaintRepo.save(facilitiesComplaint);

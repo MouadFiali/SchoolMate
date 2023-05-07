@@ -1,6 +1,8 @@
 package com.manager.schoolmateapi.complaints.models;
 
-import java.time.LocalDate;
+import java.util.Date;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.users.models.User;
@@ -39,8 +41,9 @@ public class Complaint {
     @Column(name = "status", nullable = false)
     private ComplaintStatus status;
 
+    @CreationTimestamp
     @Column(name = "date", nullable = false)
-    private LocalDate date;
+    private Date date;
 
     @ManyToOne
     @JoinColumn(name = "complainant")
