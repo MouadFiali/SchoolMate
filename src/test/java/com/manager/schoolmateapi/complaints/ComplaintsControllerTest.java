@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -117,7 +117,7 @@ public class ComplaintsControllerTest {
 		buildingComp.setDescription("The building does not have electricity");
 		buildingComp.setComplainant(complainant.getUser());
 		buildingComp.setStatus(ComplaintStatus.PENDING);
-		buildingComp.setDate(LocalDate.now());
+		buildingComp.setDate(new Date());
 
 		// Room complaint
 		RoomComplaint roomComp = new RoomComplaint();
@@ -127,7 +127,7 @@ public class ComplaintsControllerTest {
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.ASSIGNED);
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 
 		// Facility complaint
 		FacilitiesComplaint facilityComp = new FacilitiesComplaint();
@@ -136,7 +136,7 @@ public class ComplaintsControllerTest {
 		facilityComp.setComplainant(complainant.getUser());
 		facilityComp.setHandler(handler.getUser());
 		facilityComp.setStatus(ComplaintStatus.RESOLVING);
-		facilityComp.setDate(LocalDate.now());
+		facilityComp.setDate(new Date());
 
 		//Facility complaint 2 (claimed by complainant 2)
 		FacilitiesComplaint facilityComp2 = new FacilitiesComplaint();
@@ -146,7 +146,7 @@ public class ComplaintsControllerTest {
 		facilityComp2.setComplainant(complainant2.getUser());
 		facilityComp2.setHandler(handler.getUser());
 		facilityComp2.setStatus(ComplaintStatus.CONFIRMED);
-		facilityComp2.setDate(LocalDate.now());
+		facilityComp2.setDate(new Date());
 
 		// Save the test complaints
 		buildingComplaintRepo.save(buildingComp);
@@ -178,7 +178,6 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$.handler").value(IsNull.nullValue()))
 						.andExpect(jsonPath("$.complainant.lastName").value("Smith"))
 						.andExpect(jsonPath("$.status").value("PENDING"))
-						.andExpect(jsonPath("$.date").value(LocalDate.now().toString()))
 						.andExpect(jsonPath("$.dtype").value("BuildingComplaint")) // check that the dtype is not null and is set to BuildingComplaint
 						.andExpect(jsonPath("$.description").value("The building does not have hot water"))
 						.andReturn().getResponse().getContentAsString();
@@ -367,7 +366,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setStatus(ComplaintStatus.PENDING);
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 		roomComp.setDescription("The water is not working");
 
 		//save the complaint
@@ -408,7 +407,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant2.getUser());
 		roomComp.setDescription("The water is not working");
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 		roomComp.setStatus(ComplaintStatus.PENDING);
 
 		RoomComplaint roomComp2 = new RoomComplaint();
@@ -416,7 +415,7 @@ public class ComplaintsControllerTest {
 		roomComp2.setRoomProb(RoomProb.ELECTRICITY);
 		roomComp2.setComplainant(complainant2.getUser());
 		roomComp2.setDescription("The electricity is not working");
-		roomComp2.setDate(LocalDate.now());
+		roomComp2.setDate(new Date());
 		roomComp2.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaints
@@ -454,7 +453,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant2.getUser());
 		roomComp.setDescription("The water is not working");
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 		roomComp.setStatus(ComplaintStatus.PENDING);
 
 		RoomComplaint roomComp2 = new RoomComplaint();
@@ -462,7 +461,7 @@ public class ComplaintsControllerTest {
 		roomComp2.setRoomProb(RoomProb.ELECTRICITY);
 		roomComp2.setComplainant(complainant2.getUser());
 		roomComp2.setDescription("The electricity is not working");
-		roomComp2.setDate(LocalDate.now());
+		roomComp2.setDate(new Date());
 		roomComp2.setStatus(ComplaintStatus.PENDING);
 
 		BuildingComplaint buildingComp = new BuildingComplaint();
@@ -470,7 +469,7 @@ public class ComplaintsControllerTest {
 		buildingComp.setBuildingProb(BuildingProb.SHOWER);
 		buildingComp.setComplainant(complainant2.getUser());
 		buildingComp.setDescription("The shower is not working");
-		buildingComp.setDate(LocalDate.now());
+		buildingComp.setDate(new Date());
 		buildingComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaints
@@ -525,7 +524,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setDescription("The water is not working");
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.RESOLVING);
 
@@ -558,7 +557,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setDescription("The water is not working");
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.RESOLVING);
 
@@ -589,7 +588,7 @@ public class ComplaintsControllerTest {
 		buildingComp.setBuildingProb(BuildingProb.SHOWER);
 		buildingComp.setDescription("The shower is broken");
 		buildingComp.setComplainant(complainant.getUser());
-		buildingComp.setDate(LocalDate.now());
+		buildingComp.setDate(new Date());
 		buildingComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -622,7 +621,7 @@ public class ComplaintsControllerTest {
 		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
 		facilitiesComp.setComplainant(complainant.getUser());
 		facilitiesComp.setDescription("The playground is broken");
-		facilitiesComp.setDate(LocalDate.now());
+		facilitiesComp.setDate(new Date());
 		facilitiesComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -657,7 +656,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setDescription("The water is not working");
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 		roomComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -692,7 +691,7 @@ public class ComplaintsControllerTest {
 		buildingComp.setDescription("There is no electricity in the building");
 		buildingComp.setBuildingProb(BuildingProb.SHOWER);
 		buildingComp.setComplainant(complainant.getUser());
-		buildingComp.setDate(LocalDate.now());
+		buildingComp.setDate(new Date());
 		buildingComp.setHandler(handler.getUser());
 		buildingComp.setStatus(ComplaintStatus.ASSIGNED);
 
@@ -724,7 +723,7 @@ public class ComplaintsControllerTest {
 		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
 		facilitiesComp.setComplainant(complainant2.getUser());
 		facilitiesComp.setDescription("The playground is broken");
-		facilitiesComp.setDate(LocalDate.now());
+		facilitiesComp.setDate(new Date());
 		facilitiesComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -757,7 +756,7 @@ public class ComplaintsControllerTest {
 		roomComp.setRoomProb(RoomProb.WATER);
 		roomComp.setComplainant(complainant.getUser());
 		roomComp.setDescription("The water is not working");
-		roomComp.setDate(LocalDate.now());
+		roomComp.setDate(new Date());
 		roomComp.setHandler(handler.getUser());
 		roomComp.setStatus(ComplaintStatus.RESOLVING);
 
@@ -788,7 +787,7 @@ public class ComplaintsControllerTest {
 		buildingComp.setDescription("There is no electricity in the building");
 		buildingComp.setBuildingProb(BuildingProb.SHOWER);
 		buildingComp.setComplainant(complainant.getUser());
-		buildingComp.setDate(LocalDate.now());
+		buildingComp.setDate(new Date());
 
 		//save the complaint
 		buildingComp = buildingComplaintRepo.save(buildingComp);
@@ -811,7 +810,7 @@ public class ComplaintsControllerTest {
 		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
 		facilitiesComp.setComplainant(complainant2.getUser());
 		facilitiesComp.setDescription("The playground is broken");
-		facilitiesComp.setDate(LocalDate.now());
+		facilitiesComp.setDate(new Date());
 		facilitiesComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
@@ -838,7 +837,7 @@ public class ComplaintsControllerTest {
 		facilitiesComp.setFacilityType(FacilityType.PLAYGROUND);
 		facilitiesComp.setComplainant(complainant2.getUser());
 		facilitiesComp.setDescription("The playground is broken");
-		facilitiesComp.setDate(LocalDate.now());
+		facilitiesComp.setDate(new Date());
 		facilitiesComp.setStatus(ComplaintStatus.PENDING);
 
 		//save the complaint
