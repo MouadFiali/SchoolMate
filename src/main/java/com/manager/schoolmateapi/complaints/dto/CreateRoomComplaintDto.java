@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class CreateRoomComplaintDto extends CreateComplaintDto {
     
     @NotBlank(message = "The room name is required")
-    @Pattern(regexp = "[a-zA-Z][1-9]{1,2}$",
+    @Pattern(regexp = "[a-zA-Z][0-9]+",
     message = "The room name is invalid, please give the name of the room in the format 'A1' or 'B12'")
     private String room;
 
