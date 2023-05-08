@@ -20,9 +20,10 @@ public class MappersTest {
 
     @Autowired
     AMapper alertMapper;
+
     @Test
     public void testCreateAlertFromDto_shouldReturnAlertSuccesfully(){
-        CreateAlertDto createAlertDto = new CreateAlertDto()
+        CreateAlertDto createAlertDto = CreateAlertDto
         .builder()
         .title("title")
         .description("description")
@@ -41,7 +42,7 @@ public class MappersTest {
 
     @Test
     public void testEditAlertFromDto_shouldReturnChagedAlert(){
-        EditAlertDto editAlertDto = new EditAlertDto()
+        EditAlertDto editAlertDto = EditAlertDto
         .builder()
         .title("title")
         .description("description")

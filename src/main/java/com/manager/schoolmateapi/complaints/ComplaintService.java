@@ -1,9 +1,10 @@
 package com.manager.schoolmateapi.complaints;
 
-import java.time.LocalDate;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -66,32 +67,132 @@ public class ComplaintService {
       return roomComplaintRepo.findAll();
   }
 
+  // Get paginated room complaints
+  public Page<RoomComplaint> getAllRoomComplaintsPaginated(Pageable pageable) {
+    return roomComplaintRepo.findAll(pageable);
+  }
+
   public Iterable<RoomComplaint> getAllRoomComplaintsByUser(Long id) {
     return roomComplaintRepo.findAllByComplainantId(id);
+  }
+
+  // Get paginated room complaints by user
+  public Page<RoomComplaint> getAllRoomComplaintsByUserPaginated(Long id, Pageable pageable) {
+    return roomComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
   public Iterable<BuildingComplaint> getAllBuildingComplaints() {
       return buildingComplaintRepo.findAll();
   }
 
+  // Get paginated building complaints
+  public Page<BuildingComplaint> getAllBuildingComplaintsPaginated(Pageable pageable) {
+    return buildingComplaintRepo.findAll(pageable);
+  }
+
   public Iterable<BuildingComplaint> getAllBuildingComplaintsByUser(Long id) {
     return buildingComplaintRepo.findAllByComplainantId(id);
+  }
+
+  // Get paginated building complaints by user
+  public Page<BuildingComplaint> getAllBuildingComplaintsByUserPaginated(Long id, Pageable pageable) {
+    return buildingComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
   public Iterable<FacilitiesComplaint> getAllFacilitiesComplaints() {
       return facilitiesComplaintRepo.findAll();
   }
 
+  // Get paginated facilities complaints
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsPaginated(Pageable pageable) {
+    return facilitiesComplaintRepo.findAll(pageable);
+  }
+
   public Iterable<FacilitiesComplaint> getAllFacilitiesComplaintsByUser(Long id) {
     return facilitiesComplaintRepo.findByComplainantId(id);
+  }
+
+  // Get paginated facilities complaints by user
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByUserPaginated(Long id, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByComplainantId(id, pageable);
   }
 
   public Iterable<Complaint> getAllComplaints() {
     return complaintRepo.findAll();
   }
 
+  // Get paginated complaints (all types)
+  public Page<Complaint> getAllComplaintsPaginated(Pageable pageable) {
+    return complaintRepo.findAll(pageable);
+  }
+
   public Iterable<Complaint> getAllComplaintsByUser(Long id) {
     return complaintRepo.findAllByComplainantId(id);
+  }
+
+  // Get paginated complaints by user (all types)
+  public Page<Complaint> getAllComplaintsByUserPaginated(Long id, Pageable pageable) {
+    return complaintRepo.findAllByComplainantId(id, pageable);
+  }
+
+  // Get all complaints by status (paginated)
+  public Page<Complaint> getAllComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return complaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all complaints by status and user (paginated)
+  public Page<Complaint> getAllComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return complaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
+  }
+
+  // Get all building complaints by status (paginated)
+  public Page<BuildingComplaint> getAllBuildingComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return buildingComplaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all building complaints by status and user (paginated)
+  public Page<BuildingComplaint> getAllBuildingComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return buildingComplaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
+  }
+
+  // Get all room complaints by status (paginated)
+  public Page<RoomComplaint> getAllRoomComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return roomComplaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all room complaints by status and user (paginated)
+  public Page<RoomComplaint> getAllRoomComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return roomComplaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
+  }
+
+  // Get all facilities complaints by status (paginated)
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all facilities complaints by status and user (paginated)
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
+  }
+
+  // Get all complaints by handler id (paginated)
+  public Page<Complaint> getAllComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return complaintRepo.findAllByHandlerId(id, pageable);
+  }
+
+  // Get all building complaints by handler id (paginated)
+  public Page<BuildingComplaint> getAllBuildingComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return buildingComplaintRepo.findAllByHandlerId(id, pageable);
+  }
+
+  // Get all room complaints by handler id (paginated)
+  public Page<RoomComplaint> getAllRoomComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return roomComplaintRepo.findAllByHandlerId(id, pageable);
+  }
+
+  // Get all facilities complaints by handler id (paginated)
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByHandlerId(id, pageable);
   }
 
   public Complaint getComplaint(Long id){
@@ -103,7 +204,6 @@ public class ComplaintService {
 
     // Set the status to pending and the date to today
     roomComplaint.setStatus(ComplaintStatus.PENDING);
-    roomComplaint.setDate(LocalDate.now());
     roomComplaint.setComplainant(complainant);
 
     return roomComplaintRepo.save(roomComplaint);
@@ -114,7 +214,6 @@ public class ComplaintService {
 
     // Set the status to pending and the date to today
     buildingComplaint.setStatus(ComplaintStatus.PENDING);
-    buildingComplaint.setDate(LocalDate.now());
     buildingComplaint.setComplainant(complainant);
 
     return buildingComplaintRepo.save(buildingComplaint);
@@ -125,7 +224,6 @@ public class ComplaintService {
 
     // Set the status to pending and the date to today
     facilitiesComplaint.setStatus(ComplaintStatus.PENDING);
-    facilitiesComplaint.setDate(LocalDate.now());
     facilitiesComplaint.setComplainant(complainant);
 
     return facilitiesComplaintRepo.save(facilitiesComplaint);
