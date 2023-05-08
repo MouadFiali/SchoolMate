@@ -17,6 +17,8 @@ public interface ComplaintRepository extends ComplaintBaseRepo<Complaint> {
 
     Page<Complaint> findAllByStatus(ComplaintStatus status, Pageable pageable);
 
-    Page<Complaint> findAllByStatusAndComplainantId(ComplaintStatus status, Long id, Pageable pageable);
-    
+    Page<Complaint> findAllByStatusAndHandlerId(ComplaintStatus status, Long id, Pageable pageable);
+
+    Page<Complaint> findAllByHandlerId(Long id, Pageable pageable);
+
 }

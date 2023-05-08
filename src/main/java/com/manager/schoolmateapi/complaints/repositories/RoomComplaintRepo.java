@@ -16,5 +16,7 @@ public interface RoomComplaintRepo extends ComplaintBaseRepo<RoomComplaint>{
     
     Page<RoomComplaint> findAllByStatus(ComplaintStatus status, Pageable pageable);
 
-    Page<RoomComplaint> findAllByStatusAndComplainantId(ComplaintStatus status, Long id, Pageable pageable);
+    Page<RoomComplaint> findAllByStatusAndHandlerId(ComplaintStatus status, Long id, Pageable pageable);
+
+    Page<RoomComplaint> findAllByHandlerId(Long id, Pageable pageable);
 }

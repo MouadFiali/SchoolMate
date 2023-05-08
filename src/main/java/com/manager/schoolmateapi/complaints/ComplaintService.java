@@ -142,7 +142,7 @@ public class ComplaintService {
 
   // Get all complaints by status and user (paginated)
   public Page<Complaint> getAllComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
-    return complaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+    return complaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
   }
 
   // Get all building complaints by status (paginated)
@@ -152,7 +152,7 @@ public class ComplaintService {
 
   // Get all building complaints by status and user (paginated)
   public Page<BuildingComplaint> getAllBuildingComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
-    return buildingComplaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+    return buildingComplaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
   }
 
   // Get all room complaints by status (paginated)
@@ -162,7 +162,7 @@ public class ComplaintService {
 
   // Get all room complaints by status and user (paginated)
   public Page<RoomComplaint> getAllRoomComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
-    return roomComplaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+    return roomComplaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
   }
 
   // Get all facilities complaints by status (paginated)
@@ -172,9 +172,28 @@ public class ComplaintService {
 
   // Get all facilities complaints by status and user (paginated)
   public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
-    return facilitiesComplaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+    return facilitiesComplaintRepo.findAllByStatusAndHandlerId(status, id, pageable);
   }
 
+  // Get all complaints by handler id (paginated)
+  public Page<Complaint> getAllComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return complaintRepo.findAllByHandlerId(id, pageable);
+  }
+
+  // Get all building complaints by handler id (paginated)
+  public Page<BuildingComplaint> getAllBuildingComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return buildingComplaintRepo.findAllByHandlerId(id, pageable);
+  }
+
+  // Get all room complaints by handler id (paginated)
+  public Page<RoomComplaint> getAllRoomComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return roomComplaintRepo.findAllByHandlerId(id, pageable);
+  }
+
+  // Get all facilities complaints by handler id (paginated)
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByHandlerIdPaginated(Long id, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByHandlerId(id, pageable);
+  }
 
   public Complaint getComplaint(Long id){
     return complaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);

@@ -19,6 +19,8 @@ public interface FacilitiesComplaintRepo extends ComplaintBaseRepo<FacilitiesCom
 
     Page<FacilitiesComplaint> findAllByStatus(ComplaintStatus status, Pageable pageable);
 
-    Page<FacilitiesComplaint> findAllByStatusAndComplainantId(ComplaintStatus status, Long id, Pageable pageable);
+    Page<FacilitiesComplaint> findAllByStatusAndHandlerId(ComplaintStatus status, Long id, Pageable pageable);
+
+    Page<FacilitiesComplaint> findAllByHandlerId(Long id, Pageable pageable);
     
 }

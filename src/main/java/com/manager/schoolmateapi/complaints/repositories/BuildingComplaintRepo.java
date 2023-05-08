@@ -16,5 +16,7 @@ public interface BuildingComplaintRepo extends ComplaintBaseRepo<BuildingComplai
 
     Page<BuildingComplaint> findAllByStatus(ComplaintStatus status, Pageable pageable);
 
-    Page<BuildingComplaint> findAllByStatusAndComplainantId(ComplaintStatus status, Long id, Pageable pageable);
+    Page<BuildingComplaint> findAllByStatusAndHandlerId(ComplaintStatus status, Long id, Pageable pageable);
+
+    Page<BuildingComplaint> findAllByHandlerId(Long id, Pageable pageable);
 }
