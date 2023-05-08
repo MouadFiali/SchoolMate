@@ -56,7 +56,7 @@ public class PlaceSuggestionsController {
 
     }
 
-    @GetMapping(value="placesuggestions")
+    @GetMapping(value="/placesuggestions/user/me")
     public PaginatedResponse<PlaceSuggestions> getMyUserPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") List<PlaceSuggestionType> types,@AuthenticationPrincipal MyUserDetails userDetails ){
         Page<PlaceSuggestions> results = placesuggestionsService.getUserPlaceSuggestions(userDetails.getUser(), pageable);
 
