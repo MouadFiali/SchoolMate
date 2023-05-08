@@ -6,12 +6,6 @@ node {
 
     notifyBuild('STARTED')
 
-    stage('Clone Repository') {
-      git url: 'https://github.com/MouadFiali/SchoolMate.git',
-        credentialsId: 'personal-cloning-key',
-        branch: 'main'
-    }
-
     stage('Build Docker image') {
       dockerImage = docker.build("springboot-deploy:${env.BUILD_NUMBER}")
     }
