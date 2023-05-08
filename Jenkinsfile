@@ -7,13 +7,13 @@ node {
     notifyBuild('STARTED')
 
     stage('Build Docker image') {
-      dockerImage = docker.build("springboot-deploy:${env.BUILD_NUMBER}")
+      sh "docker build -t schoolmate-api:${env.BUILD_NUMBER} ."
     }
 
     stage('Deploy Docker image') {
             echo "Docker Image Tag Name: ${dockerImageTag}"
             sh "docker stop schoolmate-api || true && docker rm schoolmate-api || true"
-            sh "docker run --name schoolmate-api -d -p 8081:8081 schoolmate-api:${env.BUILD_NUMBER}"
+            sh "docker run --name schoolmate-api -d -p 8081:8080 schoolmate-api:${env.BUILD_NUMBER}"
     }
 
   } catch(e) {
