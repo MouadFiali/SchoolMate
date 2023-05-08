@@ -17,7 +17,7 @@ import com.manager.schoolmateapi.schoolzones.dto.CreateSchoolZoneDto;
 import com.manager.schoolmateapi.schoolzones.dto.EditSchoolZoneDto;
 
 @Mapper(componentModel = "spring")
-public interface DtoMapper {
+public interface SchoolZoneMapper {
 
   @Mapping(source = "geometry", target = "geometry", qualifiedByName = "listToPolygon")
   @Mapping(target = "id", ignore = true)
@@ -35,4 +35,5 @@ public interface DtoMapper {
     }).collect(Collectors.toList());
     return new Polygon(points);
   }
+
 }
