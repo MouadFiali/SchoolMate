@@ -298,7 +298,7 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$.results[0].facilityType").value("CLASS"))
 						.andExpect(jsonPath("$.results[0].handler.lastName").value("Doe"))
 						.andExpect(jsonPath("$.results[0].complainant.lastName").value("Ross"))
-						.andExpect(jsonPath("$.results[0].status").value("CONFIRMED"))
+						.andExpect(jsonPath("$.results[0].status").value("RESOLVING"))
 						.andReturn();
 	}
 
@@ -1051,6 +1051,8 @@ public class ComplaintsControllerTest {
 						.andExpect(jsonPath("$.dtype").value("FacilitiesComplaint"))
 						.andReturn();
 
+		//delete the complaint
+		facilitiesComplaintRepo.deleteById(facilitiesComp.getId());
 	}
 
 	// Clean up database after all tests
