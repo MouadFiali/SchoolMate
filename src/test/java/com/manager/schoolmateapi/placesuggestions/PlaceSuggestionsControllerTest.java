@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -52,6 +53,7 @@ public class PlaceSuggestionsControllerTest {
         @BeforeAll
         @Transactional
         public void setup() {
+                userRepository.deleteAll();
                 placeSuggestionRepository.deleteAll();
                 // creating testUser1
                 User User1 = new User();
@@ -73,6 +75,12 @@ public class PlaceSuggestionsControllerTest {
                 // save test user
                 testUser1 = new MyUserDetails(userRepository.save(User1));
                 testUser2 = new MyUserDetails(userRepository.save(User2));
+        }
+
+        @AfterAll
+        public void cleanup(){
+                userRepository.deleteAll();
+                placeSuggestionRepository.deleteAll();
         }
  
         @Test // Testing the creation of a Place Suggestion with all of the required fields
