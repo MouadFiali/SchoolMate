@@ -21,7 +21,7 @@ public class CreateFacilityComplaintDto extends CreateComplaintDto {
     @NotNull(message = "The facility type is required")
     private FacilityType facilityType;
 
-    @Pattern(regexp = "[a-zA-Z]+[1-9]+$", 
+    @Pattern(regexp = "[a-zA-Z]+\\s*[0-9]+$", 
     message = "The class name is invalid, please give the name of the class in the format 'Amphi1' or 'L9'")
     private String className;
 

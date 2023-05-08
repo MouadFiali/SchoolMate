@@ -1,6 +1,6 @@
 package com.manager.schoolmateapi.alerts.dto;
 import org.springframework.data.geo.Point;
-
+import java.util.List;
 import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 import jakarta.annotation.Nullable;
@@ -26,7 +26,7 @@ public class EditAlertDto {
     private AlertType type;
 
     @Nullable
-    private Point coordinates;
+    private List<Double> coordinates;
     
     @Nullable
     private AlertStatus status;
