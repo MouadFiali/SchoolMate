@@ -6,6 +6,12 @@ node {
 
     notifyBuild('STARTED')
 
+    stage('Clone repository') {
+        git url: 'https://github.com/MouadFiali/SchoolMate.git',
+            credentialsId: 'personal-cloning-key',
+            branch: 'main'
+     }
+
     stage('Build Docker image') {
       sh "docker build -t schoolmate-api:${env.BUILD_NUMBER} ."
     }
