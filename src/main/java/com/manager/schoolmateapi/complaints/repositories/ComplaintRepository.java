@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.manager.schoolmateapi.complaints.models.Complaint;
+import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
+
 
 @Transactional
 public interface ComplaintRepository extends ComplaintBaseRepo<Complaint> {
@@ -12,5 +14,9 @@ public interface ComplaintRepository extends ComplaintBaseRepo<Complaint> {
     Iterable<Complaint> findAllByComplainantId(Long id);
 
     Page<Complaint> findAllByComplainantId(Long id, Pageable pageable);
+
+    Page<Complaint> findAllByStatus(ComplaintStatus status, Pageable pageable);
+
+    Page<Complaint> findAllByStatusAndComplainantId(ComplaintStatus status, Long id, Pageable pageable);
     
 }

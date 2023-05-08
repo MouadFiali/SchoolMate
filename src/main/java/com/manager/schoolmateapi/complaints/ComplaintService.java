@@ -135,6 +135,47 @@ public class ComplaintService {
     return complaintRepo.findAllByComplainantId(id, pageable);
   }
 
+  // Get all complaints by status (paginated)
+  public Page<Complaint> getAllComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return complaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all complaints by status and user (paginated)
+  public Page<Complaint> getAllComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return complaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+  }
+
+  // Get all building complaints by status (paginated)
+  public Page<BuildingComplaint> getAllBuildingComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return buildingComplaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all building complaints by status and user (paginated)
+  public Page<BuildingComplaint> getAllBuildingComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return buildingComplaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+  }
+
+  // Get all room complaints by status (paginated)
+  public Page<RoomComplaint> getAllRoomComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return roomComplaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all room complaints by status and user (paginated)
+  public Page<RoomComplaint> getAllRoomComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return roomComplaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+  }
+
+  // Get all facilities complaints by status (paginated)
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByStatusPaginated(ComplaintStatus status, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByStatus(status, pageable);
+  }
+
+  // Get all facilities complaints by status and user (paginated)
+  public Page<FacilitiesComplaint> getAllFacilitiesComplaintsByStatusAndUserPaginated(ComplaintStatus status, Long id, Pageable pageable) {
+    return facilitiesComplaintRepo.findAllByStatusAndComplainantId(status, id, pageable);
+  }
+
+
   public Complaint getComplaint(Long id){
     return complaintRepo.findById(id).orElseThrow(NOT_FOUND_HANDLER);
   }

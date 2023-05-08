@@ -23,6 +23,7 @@ import com.manager.schoolmateapi.complaints.dto.CreateComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateFacilityComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.CreateRoomComplaintDto;
 import com.manager.schoolmateapi.complaints.dto.EditComplaintStatusAndHandlerDto;
+import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.complaints.models.BuildingComplaint;
 import com.manager.schoolmateapi.complaints.models.Complaint;
 import com.manager.schoolmateapi.complaints.models.FacilitiesComplaint;
@@ -234,6 +235,143 @@ public class ComplaintController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type parameter");
         }
     }
+
+    // Get complaints by status
+    @GetMapping("/complaints-by-status")
+    @PreAuthorize("hasAuthority('ADEI')")
+    PaginatedResponse<?> getComplaintsByStatusAndComplainant(
+        @AuthenticationPrincipal MyUserDetails userDetails,
+        Pageable pageable,
+        @RequestParam(required = false) ComplaintStatus status, 
+        @RequestParam(required = false) String user,
+        @RequestParam(required = false) String type){
+            // All complaints
+            if (type == null || type.equals("all")) {
+                // All users
+                if (user == null || user.equals("all")) {
+                    Page<Complaint> results = complaintService.getAllComplaintsByStatusPaginated(status, pageable);
+                    PaginatedResponse<Complaint> response = PaginatedResponse.<Complaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                // Specific user (We wont need to get complaints for the connected user as he is an ADEI member and he can't make a complaint)
+                } else {
+                    if (!user.matches("[0-9]+"))
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user parameter");
+                    Page<Complaint> results = complaintService.getAllComplaintsByStatusAndUserPaginated(status, Long.parseLong(user), pageable);
+                    PaginatedResponse<Complaint> response = PaginatedResponse.<Complaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                }
+            }
+            // Building complaints
+            else if (type.equals("building")) {
+                // All users
+                if (user == null || user.equals("all")) {
+                    Page<BuildingComplaint> results = complaintService.getAllBuildingComplaintsByStatusPaginated(status, pageable);
+                    PaginatedResponse<BuildingComplaint> response = PaginatedResponse.<BuildingComplaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                // Specific user (We wont need to get complaints for the connected user as he is an ADEI member and he can't make a complaint)
+                } else {
+                    if (!user.matches("[0-9]+"))
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user parameter");
+                    Page<BuildingComplaint> results = complaintService.getAllBuildingComplaintsByStatusAndUserPaginated(status, Long.parseLong(user), pageable);
+                    PaginatedResponse<BuildingComplaint> response = PaginatedResponse.<BuildingComplaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                }
+            }
+            // Room complaints
+            else if (type.equals("room")) {
+                // All users
+                if (user == null || user.equals("all")) {
+                    Page<RoomComplaint> results = complaintService.getAllRoomComplaintsByStatusPaginated(status, pageable);
+                    PaginatedResponse<RoomComplaint> response = PaginatedResponse.<RoomComplaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                // Specific user (We wont need to get complaints for the connected user as he is an ADEI member and he can't make a complaint)
+                } else {
+                    if (!user.matches("[0-9]+"))
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user parameter");
+                    Page<RoomComplaint> results = complaintService.getAllRoomComplaintsByStatusAndUserPaginated(status, Long.parseLong(user), pageable);
+                    PaginatedResponse<RoomComplaint> response = PaginatedResponse.<RoomComplaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                }
+            }
+            // Facilities complaints
+            else if (type.equals("facilities")) {
+                // All users
+                if (user == null || user.equals("all")) {
+                    Page<FacilitiesComplaint> results = complaintService.getAllFacilitiesComplaintsByStatusPaginated(status, pageable);
+                    PaginatedResponse<FacilitiesComplaint> response = PaginatedResponse.<FacilitiesComplaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                // Specific user (We wont need to get complaints for the connected user as he is an ADEI member and he can't make a complaint)
+                } else {
+                    if (!user.matches("[0-9]+"))
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user parameter");
+                    Page<FacilitiesComplaint> results = complaintService.getAllFacilitiesComplaintsByStatusAndUserPaginated(status, Long.parseLong(user), pageable);
+                    PaginatedResponse<FacilitiesComplaint> response = PaginatedResponse.<FacilitiesComplaint>builder()
+                        .results(results.getContent())
+                        .page(results.getNumber())
+                        .totalPages(results.getTotalPages())
+                        .count(results.getNumberOfElements())
+                        .totalItems(results.getTotalElements())
+                        .last(results.isLast())
+                        .build();
+                    return response;
+                }
+            }
+            // Invalid type
+            else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type parameter");
+            }
+        }
+
+
 
     @GetMapping("/complaints/{id}")
     Complaint getComplaint(@PathVariable Long id) {
