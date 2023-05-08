@@ -145,7 +145,7 @@ public class ComplaintsControllerTest {
 		facilityComp2.setDescription("The classroom does not have a projector");
 		facilityComp2.setComplainant(complainant2.getUser());
 		facilityComp2.setHandler(handler.getUser());
-		facilityComp2.setStatus(ComplaintStatus.CONFIRMED);
+		facilityComp2.setStatus(ComplaintStatus.RESOLVING);
 		facilityComp2.setDate(new Date());
 
 		// Save the test complaints
@@ -514,6 +514,114 @@ public class ComplaintsControllerTest {
 	}
 
 	//End test get complaint of a specific user--------------------------
+
+	//Test get complaint by status and user specs---------------------------------------------
+	@Test //get all complaints of a specific user with a specific status
+	public void testGetComplaintByStatusAndUser_shouldReturnComplaint() throws Exception {
+		// create a complaint (RESOLVING)
+		RoomComplaint roomComp = new RoomComplaint();
+		roomComp.setRoom("D15");
+		roomComp.setRoomProb(RoomProb.WATER);
+		roomComp.setComplainant(complainant.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(new Date());
+		roomComp.setHandler(handler.getUser());
+		roomComp.setStatus(ComplaintStatus.RESOLVING);
+
+		// create a complaint (RESOLVING)
+		BuildingComplaint buildingComp = new BuildingComplaint();
+		buildingComp.setBuilding("E");
+		buildingComp.setBuildingProb(BuildingProb.SHOWER);
+		buildingComp.setComplainant(complainant.getUser());
+		buildingComp.setDescription("The shower is not working");
+		buildingComp.setDate(new Date());
+		buildingComp.setHandler(handler.getUser());
+		buildingComp.setStatus(ComplaintStatus.RESOLVING);
+
+		//save the complaints
+		roomComp = roomComplaintRepo.save(roomComp);
+		buildingComp = buildingComplaintRepo.save(buildingComp);
+
+		// We also have 2 more complaints with status RESOLVING (facility complaints), one for complainant and one for complainant2
+
+		int pageSize = 3;
+		int page = 0;
+
+		//get the complaints of complainant
+		mockMvc.perform(get("/complaints-by-status?user=" + complainant.getUser().getId() + "&status=" + ComplaintStatus.RESOLVING)
+						.with(user(handler))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						// 1 room complaints, 1 building complaint and 1 facility complaint = 3
+						.andExpect(jsonPath("$.results", Matchers.hasSize(pageSize)))
+						//Check if all the complaints has the same user Ross
+						.andExpect(jsonPath("$.results[*].complainant.lastName", Matchers.everyItem(Matchers.is("Smith"))))
+						// Check if all the complaints has the same status RESOLVING
+						.andExpect(jsonPath("$.results[*].status", Matchers.everyItem(Matchers.is(ComplaintStatus.RESOLVING.toString()))))
+						.andReturn();
+	}
+
+	// Test get complaints by status and user for a specific type
+	@Test //get all complaints of a specific user with a specific status and type
+	public void testGetBuildingComplaintsByStatusAndUser_shouldReturnBuildingComplaints() throws Exception {
+		// create a complaint (PENDING)
+		RoomComplaint roomComp = new RoomComplaint();
+		roomComp.setRoom("D15");
+		roomComp.setRoomProb(RoomProb.WATER);
+		roomComp.setComplainant(complainant.getUser());
+		roomComp.setDescription("The water is not working");
+		roomComp.setDate(new Date());
+		roomComp.setStatus(ComplaintStatus.PENDING);
+
+		// create a complaint (PENDING)
+		BuildingComplaint buildingComp = new BuildingComplaint();
+		buildingComp.setBuilding("E");
+		buildingComp.setBuildingProb(BuildingProb.SHOWER);
+		buildingComp.setComplainant(complainant.getUser());
+		buildingComp.setDescription("The shower is not working");
+		buildingComp.setDate(new Date());
+		buildingComp.setStatus(ComplaintStatus.PENDING);
+
+		// create a complaint (PENDING)
+		FacilitiesComplaint facilityComp2 = new FacilitiesComplaint();
+		facilityComp2.setFacilityType(FacilityType.CLASS);
+		facilityComp2.setClassName("Amphi 5");
+		facilityComp2.setDescription("The classroom is dead");
+		facilityComp2.setComplainant(complainant.getUser());
+		facilityComp2.setStatus(ComplaintStatus.PENDING);
+		facilityComp2.setDate(new Date());
+
+		//save the complaints
+		roomComp = roomComplaintRepo.save(roomComp);
+		buildingComp = buildingComplaintRepo.save(buildingComp);
+		facilityComp2 = facilitiesComplaintRepo.save(facilityComp2);
+
+		// We now have 2 building complaints with status PENDING, and that's what we want to get
+		// The other pending complaints arent building complaints
+
+		int pageSize = 2;
+		int page = 0;
+
+		//get the complaints of complainant
+		mockMvc.perform(get("/complaints-by-status?user=" + complainant.getUser().getId() + "&status=" + ComplaintStatus.PENDING + "&type=building")
+						.with(user(handler))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						// 2 building complaints
+						.andExpect(jsonPath("$.results", Matchers.hasSize(pageSize)))
+						//Check if all the complaints has the same user Ross
+						.andExpect(jsonPath("$.results[*].complainant.lastName", Matchers.everyItem(Matchers.is("Smith"))))
+						// Check if all the complaints has the same status PENDING
+						.andExpect(jsonPath("$.results[*].status", Matchers.everyItem(Matchers.is(ComplaintStatus.PENDING.toString()))))
+						.andReturn();
+
+	}
 
 	//Test update complaint specs---------------------------------------------
 	@Test //update complaint status from resolving to resolved
