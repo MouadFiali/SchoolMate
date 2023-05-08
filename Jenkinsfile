@@ -1,5 +1,9 @@
 node {
 
+  agent {
+    docker { image 'maven:3.8.5-openjdk-17-slim' }
+  }
+
   def dockerImageTag = "schoolmate-api-${env.BUILD_NUMBER}"
 
   try {
@@ -7,10 +11,14 @@ node {
     notifyBuild('STARTED')
 
     stage('Clone repository') {
-        git url: 'git@github.com:MouadFiali/SchoolMate.git',
-            credentialsId: 'personal-cloning-key',
-            branch: 'main'
-     }
+      git url: 'git@github.com:MouadFiali/SchoolMate.git',
+        credentialsId: 'personal-cloning-key',
+        branch: 'main'
+    }
+
+    stage('Run integration & unit tests') {
+      sh "mvn clean test"
+    }
 
     stage('Build Docker image') {
       sh "docker build -t schoolmate-api:${env.BUILD_NUMBER} ."
