@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.users.models.User;
 
@@ -56,4 +57,18 @@ public class Complaint {
     // Show the dtype (that is set automatically by Hibernate)
     @Column(insertable = false, updatable = false)
     private String dtype;
+
+    @JsonIgnore
+    public String getTitle(){
+        String title = this.complainant.getFullName() + " • ";
+        if (this.dtype.equals(RoomComplaint.class.getSimpleName())) {
+            title += "Room";
+        } else if (this.dtype.equals(BuildingComplaint.class.getSimpleName())) {
+            title += "Building";
+        } else if (this.dtype.equals(FacilitiesComplaint.class.getSimpleName())) {
+            title += "Facilities";
+        }
+        title += " Complaint";
+        return title;
+    }
 }

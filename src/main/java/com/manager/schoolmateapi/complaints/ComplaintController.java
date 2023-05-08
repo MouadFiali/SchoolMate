@@ -496,8 +496,10 @@ public class ComplaintController {
     
     @PatchMapping("/complaints/{id}/handling")
     @PreAuthorize("hasAuthority('ADEI')")
-    Complaint handleComplaint(@PathVariable Long id, @Valid @RequestBody EditComplaintStatusAndHandlerDto editComplaintStatusAndHandlerDto) {
-        return complaintService.editComplaintStatusAndHandler(editComplaintStatusAndHandlerDto, id);
+    Complaint handleComplaint(@PathVariable Long id, 
+        @Valid @RequestBody EditComplaintStatusAndHandlerDto editComplaintStatusAndHandlerDto,
+        @AuthenticationPrincipal MyUserDetails userDetails) {
+        return complaintService.editComplaintStatusAndHandler(editComplaintStatusAndHandlerDto, id, userDetails.getUser());
     }
 
     @PatchMapping("/complaints/{id}/details")
