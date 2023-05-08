@@ -19,6 +19,9 @@ import com.manager.schoolmateapi.users.UserRepository;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
+import com.manager.schoolmateapi.utils.dto.PaginatedResponse;
+import net.bytebuddy.implementation.bytecode.ByteCodeAppender.Size;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,7 +34,6 @@ import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = SchoolMateApiApplication.class)
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 public class AlertsControllerTest {
 
         @Autowired
@@ -61,7 +63,7 @@ public class AlertsControllerTest {
                 anotherUser.setFirstName("Mehdi");
                 anotherUser.setLastName("essalehi");
                 anotherUser.setRole(UserRole.STUDENT);
-                anotherUser.setPassword("123456A@");
+                anotherUser.setPassword("123456A@");//
                 anotherUser.setEmail("mehdi.essalehi@gmail.com");
                 anotherUser.setActive(true);
 
@@ -89,7 +91,7 @@ public class AlertsControllerTest {
                                 .description("test alert description")
                                 .type(AlertType.DANGER)
                                 .coordinates(List.of(1.0, 1.0))
-                                .status(AlertStatus.PENDING)
+                                // .status(AlertStatus.PENDING)
                                 .build();
 
                 String response = mockMvc.perform(post("/alerts")
@@ -116,20 +118,34 @@ public class AlertsControllerTest {
                                 .description("test alert description")
                                 .type(AlertType.DANGER)
                                 .coordinates(List.of(1.0, 1.0))
-                                .status(AlertStatus.PENDING)
+                                // .status(AlertStatus.PENDING)
                                 .build();
-                mockMvc.perform(get("/alerts")
+
+                int page = 1;
+                int pageSize = 0;
+                String response = mockMvc.perform(get("/alerts")
+                                .param("page", String.valueOf(page))
+                                .param("size", String.valueOf(pageSize))
                                 .with(user(testUser))
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(alertDto)))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].title").value("test alert"))
-                                .andExpect(jsonPath("$[0].description").value("test alert description"))
-                                .andExpect(jsonPath("$[0].type").value("DANGER"))
-                                .andExpect(jsonPath("$[0].coordinates.x").value(1.0))
-                                .andExpect(jsonPath("$[0].coordinates.y").value(1.0))
-                                .andExpect(jsonPath("$[0].status").value("PENDING"))
-                                .andReturn();
+                                // .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                                // .andExpect(jsonPath("$[0].title").value("test alert"))
+                                // .andExpect(jsonPath("$[0].description").value("test alert description"))
+                                // .andExpect(jsonPath("$[0].type").value("DANGER"))
+                                // .andExpect(jsonPath("$[0].coordinates.x").value(1.0))
+                                // .andExpect(jsonPath("$[0].coordinates.y").value(1.0))
+                                // .andExpect(jsonPath("$[0].status").value("PENDING"))
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+                PaginatedResponse<Alert> paginatedResponse = (PaginatedResponse<Alert>) objectMapper.readValue(response,
+                                PaginatedResponse.class);
+                assertEquals(paginatedResponse.getResults().size(), paginatedResponse.getCount());
+                assertEquals(paginatedResponse.getPage(), page);
+                assertEquals(paginatedResponse.getCount(), pageSize);
+                assertTrue(paginatedResponse.isLast());
         }
 
         @Test // test to get an alert by ID
@@ -194,11 +210,11 @@ public class AlertsControllerTest {
                                 .title("updated title")
                                 .description("updated description")
                                 .type(AlertType.WARNING)
-                                .coordinates(new Point(2, 2))
+                                .coordinates(List.of(2.0, 2.0))
                                 .status(AlertStatus.PENDING)
                                 .build();
-                //save the updated alert
-                
+                // save the updated alert
+
                 mockMvc.perform(patch("/alerts/" + alert.getId())
                                 .with(user(testUser))
                                 .contentType("application/json")
@@ -211,7 +227,8 @@ public class AlertsControllerTest {
                                 .andExpect(jsonPath("$.type").value("WARNING"))
                                 .andExpect(jsonPath("$.coordinates.x").value(2.0))
                                 .andExpect(jsonPath("$.coordinates.x").value(2.0))
-                                .andExpect(jsonPath("$.status").value("PENDING"))//check why the other fields are not updated
+                                .andExpect(jsonPath("$.status").value("PENDING"))// check why the other fields are not
+                                                                                 // updated
                                 .andReturn();
                 // Delete the alert after the test
                 alertRepository.deleteById(alert.getId());

@@ -72,6 +72,7 @@ public class SecurityConfiguration {
                                     response.setStatus(HttpStatus.BAD_REQUEST.value());
                                     response.getWriter().write("{\"message\": \"Incorrect username or password\"}");
                                 } else {
+                                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
                                     response.getWriter().write("{\"message\": \"Authentication failed\"}");
                                 }
                             })
