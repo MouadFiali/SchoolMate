@@ -47,7 +47,7 @@ public class MappersTest {
                 .title("title")
                 .description("description")
                 .type(AlertType.ROBBERY)
-                .coordinates(new Point(1, 1))
+                .coordinates(List.of(1.0, 1.0))
                 .status(AlertStatus.PENDING)
                 .build();
         // create an alert
