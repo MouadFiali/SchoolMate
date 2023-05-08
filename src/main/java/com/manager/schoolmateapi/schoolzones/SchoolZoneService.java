@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.manager.schoolmateapi.mappers.DtoMapper;
+import com.manager.schoolmateapi.mappers.SchoolZoneMapper;
 import com.manager.schoolmateapi.schoolzones.dto.CreateSchoolZoneDto;
 import com.manager.schoolmateapi.schoolzones.dto.EditSchoolZoneDto;
 
@@ -22,7 +22,7 @@ public class SchoolZoneService {
   SchoolZoneRepository schoolZoneRepository;
 
   @Autowired
-  DtoMapper dtoMapper;
+  SchoolZoneMapper dtoMapper;
 
   public SchoolZone getSchoolZoneById(Long id) {
     return schoolZoneRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER);

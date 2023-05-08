@@ -2,11 +2,13 @@ package com.manager.schoolmateapi.documents.models;
 
 import java.util.Date;
 import java.util.Set;
-
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.CreationTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.manager.schoolmateapi.users.models.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,32 +16,49 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "documents")
 public class Document {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private long id;
 
   @Column(nullable = false)
   private String name;
 
+  @Builder.Default
   @Column(nullable = false)
-  private boolean shared;
+  private boolean shared = false;
 
   @Lob
   @Column(nullable = false)
+  @JsonIgnore
   private byte[] file;
 
-  @CreatedDate
+  @CreationTimestamp
   @Column(nullable = false)
   private Date uploadedAt;
 
-  @ManyToMany
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  @JsonIgnore
+  @EqualsAndHashCode.Exclude()
+  private User user;
+
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "documents_document_tags", joinColumns = @JoinColumn(name = "document_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+  @EqualsAndHashCode.Exclude()
   private Set<DocumentTag> tags;
 }
