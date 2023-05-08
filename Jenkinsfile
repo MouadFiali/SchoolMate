@@ -7,7 +7,7 @@ node {
     notifyBuild('STARTED')
 
     stage('Clone repository') {
-        git url: 'https://github.com/MouadFiali/SchoolMate.git',
+        git url: 'git@github.com:MouadFiali/SchoolMate.git',
             credentialsId: 'personal-cloning-key',
             branch: 'main'
      }
