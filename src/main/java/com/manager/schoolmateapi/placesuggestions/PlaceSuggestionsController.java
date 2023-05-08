@@ -1,7 +1,5 @@
 package com.manager.schoolmateapi.placesuggestions;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +30,7 @@ public class PlaceSuggestionsController {
     PlaceSuggestionsService placesuggestionsService;
 
     @GetMapping(value = "/placesuggestions")
-        public PaginatedResponse<PlaceSuggestions> getAllPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") List<PlaceSuggestionType> types) {
+        public PaginatedResponse<PlaceSuggestions> getAllPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") PlaceSuggestionType type) {
             
             Page<PlaceSuggestions> results = placesuggestionsService.getAllPlaceSuggestions(pageable);
             
@@ -57,7 +55,7 @@ public class PlaceSuggestionsController {
     }
 
     @GetMapping(value="/placesuggestions/user/me")
-    public PaginatedResponse<PlaceSuggestions> getMyUserPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") List<PlaceSuggestionType> types,@AuthenticationPrincipal MyUserDetails userDetails ){
+    public PaginatedResponse<PlaceSuggestions> getMyUserPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") PlaceSuggestionType type,@AuthenticationPrincipal MyUserDetails userDetails ){
         Page<PlaceSuggestions> results = placesuggestionsService.getUserPlaceSuggestions(userDetails.getUser(), pageable);
 
         PaginatedResponse<PlaceSuggestions> response = PaginatedResponse.<PlaceSuggestions>builder()
@@ -73,7 +71,7 @@ public class PlaceSuggestionsController {
     }
 
     @GetMapping(value = "/placesuggestions/user/{id}")
-    public PaginatedResponse<PlaceSuggestions> getUserPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") List<PlaceSuggestionType> types, @PathVariable("id") Long id){
+    public PaginatedResponse<PlaceSuggestions> getUserPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") PlaceSuggestionType type, @PathVariable("id") Long id){
         Page<PlaceSuggestions> results = placesuggestionsService.getUserPlaceSuggestionsById(id, pageable);
 
         PaginatedResponse<PlaceSuggestions> response = PaginatedResponse.<PlaceSuggestions>builder()
