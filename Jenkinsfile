@@ -4,7 +4,7 @@ node {
     docker { image 'maven:3.8.5-openjdk-17-slim' }
   }
 
-  def dockerImageTag = "schoolmate-api-${env.BUILD_NUMBER}"
+  def dockerImageTag = "messalehi/schoolmate-api:${env.BUILD_NUMBER}"
 
   try {
 
@@ -17,17 +17,22 @@ node {
     }
 
     stage('Run integration & unit tests') {
-      sh "mvn clean test"
+      withCredentials([
+        string(credentialsId: 'schoolmate-test-database-url', variable: 'TEST_DATABASE_URL'),
+        string(credentialsId: 'schoolmate-test-database-username', variable: 'TEST_DATABASE_USERNAME'),
+        string(credentialsId: 'schoolmate-test-database-password', variable: 'TEST_DATABASE_PASSWORD')
+      ]) {        
+        sh('./mvnw test -Dspring.profiles.active=prod -Dspring.datasource.url=$TEST_DATABASE_URL -Dspring.datasource.username=$TEST_DATABASE_USERNAME -Dspring.datasource.password=$TEST_DATABASE_PASSWORD')
+      }
     }
 
     stage('Build Docker image') {
-      sh "docker build -t schoolmate-api:${env.BUILD_NUMBER} ."
+      sh "docker build -t ${dockerImageTag} ."
     }
 
     stage('Deploy Docker image') {
-            echo "Docker Image Tag Name: ${dockerImageTag}"
-            sh "docker stop schoolmate-api || true && docker rm schoolmate-api || true"
-            sh "docker run --name schoolmate-api -d -p 8081:8080 schoolmate-api:${env.BUILD_NUMBER}"
+      echo "Docker Image Tag Name: ${dockerImageTag}"
+      sh "docker push messalehi/${dockerImageTag}"
     }
 
   } catch(e) {
