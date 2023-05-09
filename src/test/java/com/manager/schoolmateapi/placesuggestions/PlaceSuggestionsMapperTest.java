@@ -40,7 +40,7 @@ public class PlaceSuggestionsMapperTest {
         .builder()
         .description("description")
         .suggestiontype(PlaceSuggestionType.Entertainment)
-        .coordinates(new Point(1, 1))
+        .coordinates(List.of(1.0, 1.0))
         .build();
 
         //create the old suggestion

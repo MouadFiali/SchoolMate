@@ -289,7 +289,7 @@ public class PlaceSuggestionsControllerTest {
                 EditPlaceSuggestionDto editPlaceSuggestionDto = EditPlaceSuggestionDto.builder()
                                 .description("updated suggestion description")
                                 .suggestiontype(PlaceSuggestionType.Other)
-                                .coordinates(new Point(2, 2))
+                                .coordinates(List.of(2.0, 2.0))
                                 .build();
 
                 // save the updated suggestion
@@ -302,7 +302,7 @@ public class PlaceSuggestionsControllerTest {
                                 .andExpect(jsonPath("$.description").value("updated suggestion description"))
                                 .andExpect(jsonPath("$.suggestiontype").value("Other"))
                                 .andExpect(jsonPath("$.coordinates.x").value(2.0))
-                                .andExpect(jsonPath("$.coordinates.x").value(2.0))
+                                .andExpect(jsonPath("$.coordinates.y").value(2.0))
                                 .andReturn();
 
                 // Delete the suggestion after the test
