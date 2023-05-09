@@ -1129,6 +1129,19 @@ public class ComplaintsControllerTest {
 		facilitiesComplaintRepo.deleteById(facilitiesComp.getId());
 	}
 
+	// Test getting complaint count by handler-----------------------------------------
+	@Test
+	public void testGetComplaintCountByHandler() throws Exception {
+		// get the complaint count by handler
+		mockMvc.perform(get("/complaints/count-by-handler/" + handler.getUser().getId())
+						.with(user(handler))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$").value(3))
+						.andReturn();
+
+	}
+
 	// Clean up database after all tests
 	@AfterAll
 	public void cleanUp() {
