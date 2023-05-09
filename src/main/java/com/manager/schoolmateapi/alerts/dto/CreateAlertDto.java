@@ -29,7 +29,5 @@ public class CreateAlertDto {
     @NotNull(message = "The coordinates are necessary")
     private List<Double> coordinates;
 
-    @NotNull(message = "The status is necessary")
-    private AlertStatus status;
 
 }
