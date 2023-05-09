@@ -69,6 +69,8 @@ public class SecurityConfiguration {
                             .failureHandler((request, response, exception) -> {
                                 response.setContentType("application/json");
                                 if (exception instanceof BadCredentialsException) {
+                                    // set status code to 400 (Bad Request) when the username or password is incorrect
+                                    // by default, the response status code is 200 (OK)
                                     response.setStatus(HttpStatus.BAD_REQUEST.value());
                                     response.getWriter().write("{\"message\": \"Incorrect username or password\"}");
                                 } else {
