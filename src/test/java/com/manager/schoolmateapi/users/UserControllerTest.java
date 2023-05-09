@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manager.schoolmateapi.SchoolMateApiApplication;
+import com.manager.schoolmateapi.users.dto.CreateUserDto;
+import com.manager.schoolmateapi.users.dto.EditUserDto;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
@@ -79,6 +81,49 @@ public class UserControllerTest {
         // Create a test user
         testUser = new MyUserDetails(user3);
     }
+
+    @Test // create a user with a valid email
+    public void testCreateUser_withValidEmail() throws Exception {
+        CreateUserDto user = CreateUserDto.builder()
+            .firstName("Mouad")
+            .lastName("FIALI")
+            .email("mouad_fiali@um5.ac.ma") // Valid email
+            .password("P@ssw0rd")
+            .confirmPassowrd("P@ssw0rd")
+            .build();
+
+        String response = mockMvc.perform(post("/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.email", Matchers.is(user.getEmail())))
+                    .andReturn().getResponse().getContentAsString();
+
+        // Delete the user
+        Long id = new JSONObject(response).getLong("id");
+        userRepository.deleteById(id);
+    }
+
+    @Test // create a user with an existing email
+    public void testCreateUser_withExistingEmail() throws Exception {
+        CreateUserDto user = CreateUserDto.builder()
+            .firstName("Mouad")
+            .lastName("FIALI")
+            .email("john_doe@um5.ac.ma") // Existing email
+            .password("P@ssw0rd")
+            .confirmPassowrd("P@ssw0rd")
+            .build();
+
+        mockMvc.perform(post("/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.detail", Matchers.is("Email already exists")))
+                    .andReturn();
+        
+        // no user should be created
+    }
+
 
     @Test // Test search by first name
     public void testGetUsersBySearch_withFirstName() throws Exception {
@@ -216,6 +261,48 @@ public class UserControllerTest {
             .andReturn();
     }
 
+    @Test // Test get user by id
+    public void testGetUserById_shouldReturnUser() throws Exception {
+
+        // Create a user
+        User user = new User();
+        user.setFirstName("mouad");
+        user.setLastName("fiali");
+        user.setEmail("mouad_fiali@um5.ac.ma");
+        user.setPassword("password");
+        user.setRole(UserRole.STUDENT);
+
+        // Save the user
+        userRepository.save(user);
+
+        // Get the user by id
+        mockMvc.perform(get("/users/" + user.getId())
+            .with(user(testUser))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.firstName", Matchers.is("mouad")))
+            .andExpect(jsonPath("$.lastName", Matchers.is("fiali")))
+            .andExpect(jsonPath("$.email", Matchers.is("mouad_fiali@um5.ac.ma")))
+            .andExpect(jsonPath("$.role", Matchers.is("STUDENT")))
+            .andReturn();
+
+        // Delete the user
+        userRepository.delete(user);
+    }
+
+    @Test // Test get user by id with an invalid id
+    public void testGetUserById_shouldReturnNotFound() throws Exception {
+
+        // Get the user by id
+        mockMvc.perform(get("/users/0")
+            .with(user(testUser))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.detail", Matchers.is("User not found")))
+            .andReturn();
+    
+    }
+
     @Test // test login with a valid user
     public void testLogin_shouldReturnStatusOK() throws Exception {
 
@@ -234,6 +321,198 @@ public class UserControllerTest {
 
     }
 
+    @Test // test edit user by id when it's not the principal
+    public void testEditUserById_shouldReturnForbidden() throws Exception {
+
+        EditUserDto editUserDto = EditUserDto.builder()
+            .firstName("john le bon")
+            .lastName("doe le bien")
+            .build();
+
+        // create a user
+        User user = new User();
+        user.setFirstName("Mouad");
+        user.setLastName("Fiali");
+        user.setEmail("mouad_fiali@um5.ac.ma");
+        user.setPassword("password");
+        user.setRole(UserRole.STUDENT);
+
+        // save the user
+        userRepository.save(user);
+
+        // edit the user
+        mockMvc.perform(patch("/users/" + user.getId())
+            .with(user(testUser))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(editUserDto)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.detail", Matchers.is("You are not authorized to edit this user")))
+            .andReturn();
+        
+        // delete the user
+        userRepository.delete(user);
+    }
+
+    @Test // test edit user by id when it's the principal
+    public void testEditUserById_shouldReturnUser() throws Exception {
+
+        EditUserDto editUserDto = EditUserDto.builder()
+            .firstName("john le bon")
+            .lastName("doe le bien")
+            .build();
+
+         // create a user
+         User user = new User();
+         user.setFirstName("mike");
+         user.setLastName("ross");
+         user.setEmail("mike_ross@um5.ac.ma");
+         user.setPassword("password");
+         user.setRole(UserRole.STUDENT);
+ 
+         // save the user
+         user = userRepository.save(user);
+
+         MyUserDetails userDetails = new MyUserDetails(user);
+
+        // edit the user
+        mockMvc.perform(patch("/users/" + userDetails.getUser().getId())
+            .with(user(userDetails))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(editUserDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.firstName", Matchers.is("john le bon")))
+            .andExpect(jsonPath("$.lastName", Matchers.is("doe le bien")))
+            .andReturn();
+        
+        // delete the user
+        userRepository.delete(user);
+
+    }
+
+    @Test // test edit the user's role by Moderator
+    public void testEditUserRole_shouldReturnUser() throws Exception {
+
+        EditUserDto editUserRoleDto = EditUserDto.builder()
+            .role(UserRole.ADEI)
+            .build();
+
+        // create a user
+        User user = new User();
+        user.setFirstName("Mouad");
+        user.setLastName("Fiali");
+        user.setEmail("mouad_fiali@um5.ac.ma");
+        user.setPassword("password");
+        user.setRole(UserRole.STUDENT);
+
+        // create a moderator
+        User moderator = new User();
+        moderator.setFirstName("moderator");
+        moderator.setLastName("moderator");
+        moderator.setEmail("moderator@um5.ac.ma");
+        moderator.setPassword("password");
+        moderator.setRole(UserRole.MODERATOR);
+
+        // save the user
+        userRepository.save(user);
+        userRepository.save(moderator);
+
+        MyUserDetails userDetails = new MyUserDetails(moderator);
+
+        // edit the user's role
+        mockMvc.perform(patch("/users/" + user.getId())
+            .with(user(userDetails))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(editUserRoleDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.role", Matchers.is("ADEI")))
+            .andReturn();
+
+        // delete the user
+        userRepository.delete(user);
+        userRepository.delete(moderator);
+
+    }
+
+    @Test // test edit the user's role by himself
+    public void testEditUserRole_shouldReturnForbidden() throws Exception {
+
+        EditUserDto editUserDto = EditUserDto.builder()
+            .firstName("john le bon")
+            .lastName("doe le bien")
+            .role(UserRole.ADEI)
+            .build();
+
+         // create a user
+         User user = new User();
+         user.setFirstName("Mouad");
+         user.setLastName("Fiali");
+         user.setEmail("mouad_fiali@um5.ac.ma");
+         user.setPassword("password");
+         user.setRole(UserRole.STUDENT);
+ 
+         // save the user
+         userRepository.save(user);
+
+         MyUserDetails userDetails = new MyUserDetails(user);
+
+        // edit the user
+        mockMvc.perform(patch("/users/" + user.getId())
+            .with(user(userDetails))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(editUserDto)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.detail", Matchers.is("You are not authorized to edit this user")))
+            .andReturn();
+
+        // delete the user
+        userRepository.delete(user);
+    }
+
+    @Test // test edit user's details by another moderator
+    public void testEditUserDetails_shouldReturnForbidden() throws Exception {
+
+        EditUserDto editUserRoleDto = EditUserDto.builder()
+            .role(UserRole.ADEI)
+            .email("bad_email@um5.ac.ma")
+            .build();
+
+        // create a user
+        User user = new User();
+        user.setFirstName("Mouad");
+        user.setLastName("Fiali");
+        user.setEmail("mouad_fiali@um5.ac.ma");
+        user.setPassword("password");
+        user.setRole(UserRole.STUDENT);
+
+        // create a moderator
+        User moderator = new User();
+        moderator.setFirstName("moderator");
+        moderator.setLastName("moderator");
+        moderator.setEmail("moderator@um5.ac.ma");
+        moderator.setPassword("password");
+        moderator.setRole(UserRole.MODERATOR);
+
+        // save the user
+        userRepository.save(user);
+        userRepository.save(moderator);
+
+        MyUserDetails userDetails = new MyUserDetails(moderator);
+
+        // edit the user's role
+        mockMvc.perform(patch("/users/" + user.getId())
+            .with(user(userDetails))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(editUserRoleDto)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.detail", Matchers.is("You can only change the role of the user")))
+            .andReturn();
+
+        // delete the user
+        userRepository.delete(user);
+        userRepository.delete(moderator);
+
+    }
+
     @Test // test login with an invalid user
     public void testLogin_shouldReturnStatusBadRequest() throws Exception {
 
@@ -249,6 +528,77 @@ public class UserControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", Matchers.is("Incorrect username or password")))
             .andReturn();
+    }
+
+    @Test // test delete user by id by ROLE ADEI
+    public void testDeleteUserById_shouldReturnForbidden() throws Exception {
+
+        // Create a user
+        User user = new User();
+        user.setFirstName("mouad");
+        user.setLastName("fiali");
+        user.setEmail("mouad_fiali@um5.ac.ma");
+        user.setPassword("password");
+        user.setRole(UserRole.STUDENT);
+
+        // Save the user
+        userRepository.save(user);
+
+        // Delete the user by id
+        mockMvc.perform(delete("/users/" + user.getId())
+            .with(user(testUser))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden())
+            .andReturn();
+        
+        // Delete the user
+        userRepository.delete(user);
+    }
+
+    @Test // test delete user by id by ROLE MODERATOR
+    public void testDeleteUserById_shouldReturnDeleted() throws Exception {
+
+        // Create a user
+        User user = new User();
+        user.setFirstName("delete");
+        user.setLastName("delete");
+        user.setEmail("delete@um5.ac.ma");
+        user.setPassword("password");
+        user.setRole(UserRole.STUDENT);
+
+        // create a moderator
+        User moderator = new User();
+        moderator.setFirstName("mehdi");
+        moderator.setLastName("essalehi");
+        moderator.setEmail("mehdi_essalehi@um5.ac.ma");
+        moderator.setPassword("password");
+        moderator.setRole(UserRole.MODERATOR);
+
+
+        // Save the user
+        userRepository.save(user);
+        userRepository.save(moderator);
+
+        MyUserDetails userDetails = new MyUserDetails(moderator);
+
+        // Delete the user by id
+        mockMvc.perform(delete("/users/" + user.getId())
+            .with(user(userDetails))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message", Matchers.is("User deleted successfully")))
+            .andReturn();
+
+        // get the user by id
+        mockMvc.perform(get("/users/" + user.getId())
+            .with(user(userDetails))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.detail", Matchers.is("User not found")))
+            .andReturn();
+
+        // Delete the moderator
+        userRepository.delete(moderator);
     }
 
     @AfterAll
