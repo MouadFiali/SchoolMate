@@ -65,6 +65,14 @@ public class ComplaintController {
         }
     }
 
+    // endpoint to get the count of complaints by handler
+    @GetMapping("/complaints/count-by-handler/{id}")
+    @PreAuthorize("hasAuthority('ADEI')")
+    Long getComplaintsCountByHandler(@PathVariable Long id){
+        Page<Complaint> results = complaintService.getAllComplaintsByHandlerIdPaginated(id, Pageable.unpaged());
+        return results.getTotalElements();
+    }
+
     @GetMapping("/complaints")
     PaginatedResponse<?> getAllComplaints(
         @AuthenticationPrincipal MyUserDetails userDetails,
