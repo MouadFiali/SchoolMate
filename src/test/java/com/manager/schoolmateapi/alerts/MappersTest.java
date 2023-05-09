@@ -23,7 +23,7 @@ public class MappersTest {
 
     @Test
     public void testCreateAlertFromDto_shouldReturnAlertSuccesfully() {
-        CreateAlertDto createAlertDto = new CreateAlertDto()
+        CreateAlertDto createAlertDto = CreateAlertDto
                 .builder()
                 .title("title")
                 .description("description")
@@ -35,12 +35,12 @@ public class MappersTest {
         assert (alert.getDescription().equals(createAlertDto.getDescription()));
         assert (alert.getType().equals(createAlertDto.getType()));
         assertThat(alert.getCoordinates(), Matchers.is(listToPoint(createAlertDto.getCoordinates())));
-        //assert (alert.getStatus().equals(createAlertDto.getStatus()));
+        // assert (alert.getStatus().equals(createAlertDto.getStatus()));
     }
 
     @Test
     public void testEditAlertFromDto_shouldReturnChagedAlert() {
-        EditAlertDto editAlertDto = new EditAlertDto()
+        EditAlertDto editAlertDto = EditAlertDto
                 .builder()
                 .title("title")
                 .description("description")
@@ -59,7 +59,8 @@ public class MappersTest {
         assert (alert.getTitle().equals(editAlertDto.getTitle()));
         assert (alert.getDescription().equals(editAlertDto.getDescription()));
         assert (alert.getType().equals(editAlertDto.getType()));
-        assertThat(alert.getCoordinates(), Matchers.is(editAlertDto.getCoordinates()));
+        assertThat(alert.getCoordinates().getX(), Matchers.is(editAlertDto.getCoordinates().get(0)));
+        assertThat(alert.getCoordinates().getY(), Matchers.is(editAlertDto.getCoordinates().get(1)));
         assert (alert.getStatus().equals(editAlertDto.getStatus()));
 
     }
