@@ -5,9 +5,11 @@ import com.manager.schoolmateapi.users.enumerations.UserRole;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class EditUserDto {
     @Nullable
     private String firstName;

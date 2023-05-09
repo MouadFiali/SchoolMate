@@ -1,12 +1,10 @@
 package com.manager.schoolmateapi.onesignal;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +12,7 @@ import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.onesignal.data.AlertData;
 import com.manager.schoolmateapi.onesignal.data.ComplaintData;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
+import com.manager.schoolmateapi.users.models.User;
 import com.onesignal.client.ApiClient;
 import com.onesignal.client.ApiException;
 import com.onesignal.client.Configuration;
@@ -46,7 +45,6 @@ public class OneSignalService {
 
   private String ONESIGNAL_APP_ID;
 
-  @Autowired
   public OneSignalService(@Value("${onesignal.app.id}") String appId, @Value("${onesignal.user.key}") String userKey,
       @Value("${onesignal.app.key}") String appKey) {
     this.ONESIGNAL_APP_ID = appId;
@@ -173,32 +171,47 @@ public class OneSignalService {
   }
 
   /**
-   * Same as
-   * {@link OneSignalService#notifyComplainantAboutComplaintStatusChange(long, String,
-   * String, ComplaintStatus)} but sends the notification to a handler
+   * Sends notification to a complainant when the complaint has change status
    * 
-   * IMPORTANT: Use this only if the new status is ASSIGNED. Else, use the
-   * overload without {@param handlerEmail}
+   * @param complaintId      ID of the complaint
+   * @param complaintTitle   Title of the complainant
+   * @param complainantEmail Email of the complainant
+   * @param newStatus        New status of the complaint
    */
   public void notifyComplainantAboutComplaintStatusChange(long complaintId, String complaintTitle,
-      String complainantEmail, ComplaintStatus newStatus, String handlerEmail) {
+      String complainantEmail, ComplaintStatus newStatus) {
 
-    List<String> notifiedUsers = new ArrayList<>();
-    notifiedUsers.add(complainantEmail);
+        Notification notification = createTargetedNotification(
+          "Your complaint is now " + newStatus.toString().toLowerCase(),
+          complaintTitle,
+          complainantEmail);
+  
+      notification.setData(new ComplaintData(complaintId));
+  
+      try {
+        apiClient.createNotification(notification);
+      } catch (ApiException e) {
+        e.printStackTrace();
+      }
 
-    if (handlerEmail == null && newStatus == ComplaintStatus.ASSIGNED
-        || handlerEmail != null && newStatus != ComplaintStatus.ASSIGNED) {
-      throw new IllegalArgumentException("Handler email must be provided only when the status is ASSIGNED");
-    }
+  }
 
-    if (handlerEmail != null) {
-      notifiedUsers.add(handlerEmail);
-    }
+  /**
+   * Sends notification to a handler when the complaint is assigned to them
+   * 
+   * @param complaintId       ID of the complaint
+   * @param complaintTitle    Title of the complainant
+   * @param handlerEmail      Email of the complainant
+   * @param principal         User who assigned the complaint
+   */
+  public void notifyHandlerAboutNewComplaintAssigned(long complaintId, String complaintTitle, String handlerEmail,
+          User principal) {
 
+    
     Notification notification = createTargetedNotification(
-        "Your complaint is " + newStatus.toString().toLowerCase(),
+        "A new complaint has been assigned to you by " + principal.getFullName(),
         complaintTitle,
-        complainantEmail);
+        handlerEmail);
 
     notification.setData(new ComplaintData(complaintId));
 
@@ -207,20 +220,8 @@ public class OneSignalService {
     } catch (ApiException e) {
       e.printStackTrace();
     }
-  }
 
-  /**
-   * Sends notification to a complainant when the complaint has change status
-   * 
-   * @param complaintId      ID of the complaint
-   * @param complainantTitle Title of the complainant
-   * @param complainantEmail Email of the complainant
-   * @param newStatus        New status of the complaint
-   */
-  public void notifyComplainantAboutComplaintStatusChange(long complaintId, String complaintTitle,
-      String complainantEmail, ComplaintStatus newStatus) {
-
-    notifyComplainantAboutComplaintStatusChange(complaintId, complaintTitle, complainantEmail, null);
+    
   }
 
   /**
@@ -232,7 +233,7 @@ public class OneSignalService {
    */
   public void notifyHandlerAboutComplaintDeleted(String complaintTitle, String handlerEmail) {
     Notification notification = createTargetedNotification(
-        "Complaint deleted",
+        "This complaint has been deleted",
         complaintTitle,
         handlerEmail);
 

@@ -85,7 +85,7 @@ public class PlaceSuggestionsControllerTest {
                                 .coordinates(List.of(1.0, 1.0))
                                 .build();
 
-                String response = mockMvc.perform(post("/placesuggestions")
+                mockMvc.perform(post("/placesuggestions")
                                 .with(user(testUser1))
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(placeSuggestionDto)))
