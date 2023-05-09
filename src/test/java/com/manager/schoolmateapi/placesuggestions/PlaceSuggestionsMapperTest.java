@@ -23,7 +23,7 @@ public class PlaceSuggestionsMapperTest {
 
     @Test
     public void testCreatePlaceSuggestionFromDto_shouldReturnPlaceSuggestionSuccesfully() {
-        CreatePlaceSuggestionDto createPlaceSuggetionDto = new CreatePlaceSuggestionDto().builder()
+        CreatePlaceSuggestionDto createPlaceSuggetionDto = CreatePlaceSuggestionDto.builder()
                 .description("this is a description")
                 .suggestiontype(PlaceSuggestionType.StudyPlace)
                 .coordinates(List.of(1.0, 1.0))
@@ -36,7 +36,7 @@ public class PlaceSuggestionsMapperTest {
 
     @Test
     public void testEditPlaceSuggestionFromDto_shouldReturnChangedPlaceSuggestion(){
-        EditPlaceSuggestionDto editPlaceSuggestionDto = new EditPlaceSuggestionDto()
+        EditPlaceSuggestionDto editPlaceSuggestionDto = EditPlaceSuggestionDto
         .builder()
         .description("description")
         .suggestiontype(PlaceSuggestionType.Entertainment)
