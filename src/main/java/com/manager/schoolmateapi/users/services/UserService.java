@@ -73,6 +73,11 @@ public class UserService {
 
 
 	public User addUser(CreateUserDto createUserDto){
+		// Check if email already exists (to avoid an error from the unique constraint)
+		User check = userRepository.findByEmail(createUserDto.getEmail()).orElse(null);
+		if(check != null){
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+		}
 		User user = userDtoMapper.createUserDtoToUser(createUserDto);
 		user.setActive(true);
 		return userRepository.save(user);

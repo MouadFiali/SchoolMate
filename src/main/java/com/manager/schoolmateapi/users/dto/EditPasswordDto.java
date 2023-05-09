@@ -6,9 +6,11 @@ import com.manager.schoolmateapi.users.validators.VerifyOldPassword;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 @PasswordMatches(password = "password", passwordConfirmation = "confirmPassowrd")
 public class EditPasswordDto {
     

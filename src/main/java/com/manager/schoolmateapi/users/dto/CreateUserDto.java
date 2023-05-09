@@ -7,9 +7,11 @@ import com.manager.schoolmateapi.users.validators.PasswordMatches;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 @PasswordMatches(password = "password", passwordConfirmation = "confirmPassowrd")
 public class CreateUserDto {
     
