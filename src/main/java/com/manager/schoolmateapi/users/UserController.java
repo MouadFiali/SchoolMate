@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.manager.schoolmateapi.users.dto.CreateUserDto;
 import com.manager.schoolmateapi.users.dto.EditPasswordDto;
@@ -106,8 +109,20 @@ public class UserController {
 	@PatchMapping("/users/{id}")
 	User editUser(
 		@PathVariable("id") Long id,
-		@Valid @RequestBody EditUserDto editUserDto){
-			return userService.editUser(id, editUserDto);
+		@Valid @RequestBody EditUserDto editUserDto,
+		@AuthenticationPrincipal MyUserDetails userDetails){
+			// if the user is editing their own profile and they are not changing their role
+			if(userDetails.getUser().getId() == id && editUserDto.getRole() == null){ 
+				return userService.editUser(id, editUserDto);
+			} else if (userDetails.getUser().getRole() == UserRole.MODERATOR && editUserDto.getRole() != null){
+				if(editUserDto.getEmail()!=null || editUserDto.getFirstName()!=null || editUserDto.getLastName()!=null){
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only change the role of the user");
+				}
+				return userService.editUser(id, editUserDto);
+			} else {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to edit this user");
+			}
+				
 	}
 
 	@GetMapping("/me")
@@ -124,8 +139,9 @@ public class UserController {
 	}
 
 	@DeleteMapping("/users/{id}")
+	@PreAuthorize("hasAuthority('MODERATOR')")
 	MessageResponse deleteUser(@PathVariable("id") Long id){
 		userService.deleteUser(id);
-		return new MessageResponse("user deleted successfully");
+		return new MessageResponse("User deleted successfully");
 	}
 }
