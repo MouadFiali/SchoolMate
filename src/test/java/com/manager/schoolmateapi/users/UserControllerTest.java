@@ -216,7 +216,40 @@ public class UserControllerTest {
             .andReturn();
     }
 
+    @Test // test login with a valid user
+    public void testLogin_shouldReturnStatusOK() throws Exception {
 
+        // Create a json object with the email and password of the test user
+        JSONObject json = new JSONObject();
+        json.put("username", "john_doe@um5.ac.ma");
+        json.put("password", "password");
+        
+        // login with the test user
+        mockMvc.perform(post("/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json.toString()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message", Matchers.is("Logged in successfully")))
+            .andReturn();
+
+    }
+
+    @Test // test login with an invalid user
+    public void testLogin_shouldReturnStatusBadRequest() throws Exception {
+
+        // Create a json object with the email and password of the test user
+        JSONObject json = new JSONObject();
+        json.put("username", "john_doe@um5.ac.ma");
+        json.put("password", "wrong_password");
+
+        // login with the test user
+        mockMvc.perform(post("/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json.toString()))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", Matchers.is("Incorrect username or password")))
+            .andReturn();
+    }
 
     @AfterAll
     public void tearDown() throws Exception {
