@@ -605,6 +605,80 @@ public class ComplaintsControllerTest {
 		facilitiesComplaintRepo.delete(facilityComp2);
 	}
 
+	@Test // get complaints of all status of a specific type and handler
+	public void testGetComplaintsByStatusAndHandler_shouldReturnComplaints() throws Exception {
+		// create a handler 2
+		User handler2 = new User();
+		handler2.setFirstName("handler2");
+		handler2.setLastName("handler2");
+		handler2.setEmail("handler2@um5.ac.ma");
+		handler2.setPassword("handler2");
+		handler2.setRole(UserRole.ADEI);
+
+		handler2 = userRepository.save(handler2);
+
+		
+		BuildingComplaint buildingComp = new BuildingComplaint();
+		buildingComp.setBuilding("E");
+		buildingComp.setBuildingProb(BuildingProb.SHOWER);
+		buildingComp.setComplainant(complainant.getUser());
+		buildingComp.setDescription("The shower is not working");
+		buildingComp.setDate(new Date());
+		buildingComp.setHandler(handler.getUser());
+		buildingComp.setStatus(ComplaintStatus.ASSIGNED);
+
+		FacilitiesComplaint facilityComp3 = new FacilitiesComplaint();
+		facilityComp3.setFacilityType(FacilityType.CLASS);
+		facilityComp3.setClassName("A1");
+		facilityComp3.setDescription("The class is not working");
+		facilityComp3.setComplainant(complainant.getUser());
+		facilityComp3.setStatus(ComplaintStatus.REJECTED);
+		facilityComp3.setDate(new Date());
+		facilityComp3.setHandler(handler.getUser());
+
+		FacilitiesComplaint facilityComp2 = new FacilitiesComplaint();
+		facilityComp2.setFacilityType(FacilityType.CLASS);
+		facilityComp2.setClassName("Amphi 5");
+		facilityComp2.setDescription("The classroom is dead");
+		facilityComp2.setComplainant(complainant.getUser());
+		facilityComp2.setStatus(ComplaintStatus.RESOLVING);
+		facilityComp2.setDate(new Date());
+		facilityComp2.setHandler(handler2);
+
+		//save the complaints
+		buildingComp = buildingComplaintRepo.save(buildingComp);
+		facilityComp3 = facilitiesComplaintRepo.save(facilityComp3);
+		facilityComp2 = facilitiesComplaintRepo.save(facilityComp2);
+
+		int pageSize = 3;
+		int page = 0;
+
+		// We have 3 facilities complaints handled by handler 1
+		//get the complaints of a handler
+		mockMvc.perform(get("/complaints-by-status?type=facilities&handler=" + handler.getUser().getId())
+						.with(user(handler))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						// 1 facilities complaints with status RESOLVING
+						.andExpect(jsonPath("$.results", Matchers.hasSize(3)))
+						//Check if all the complaints has the same user Ross
+						.andExpect(jsonPath("$.results[*].handler.lastName", Matchers.everyItem(Matchers.is("Doe"))))
+						// check the type of the complaints
+						.andExpect(jsonPath("$.results[*].dtype", Matchers.everyItem(Matchers.is("FacilitiesComplaint"))))
+						.andReturn();
+
+		// delete the complaints
+		buildingComplaintRepo.delete(buildingComp);
+		facilitiesComplaintRepo.delete(facilityComp3);
+		facilitiesComplaintRepo.delete(facilityComp2);
+
+		// delete the handler 2
+		userRepository.delete(handler2);
+	}
+
 	@Test //get all resolving complaints of a specific type
 	public void testGetBuildingComplaintsByStatusRESOLVING_shouldReturnBuildingComplaints() throws Exception {
 		// create a complaint 1 with handler 1 (RESOLVING)
