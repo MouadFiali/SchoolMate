@@ -36,6 +36,7 @@ import jakarta.validation.Valid;
 
 @RestController
 public class UserController {
+
 	@Autowired
 	UserService userService;
 
@@ -112,7 +113,7 @@ public class UserController {
 		@Valid @RequestBody EditUserDto editUserDto,
 		@AuthenticationPrincipal MyUserDetails userDetails){
 			// if the user is editing their own profile and they are not changing their role
-			if(userDetails.getUser().getId() == id && editUserDto.getRole() == null){ 
+			if(userDetails.getUser().getId().equals(id) && editUserDto.getRole() == null){ 
 				return userService.editUser(id, editUserDto);
 			} else if (userDetails.getUser().getRole() == UserRole.MODERATOR && editUserDto.getRole() != null){
 				if(editUserDto.getEmail()!=null || editUserDto.getFirstName()!=null || editUserDto.getLastName()!=null){
