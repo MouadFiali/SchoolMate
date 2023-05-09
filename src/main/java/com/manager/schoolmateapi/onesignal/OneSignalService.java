@@ -14,7 +14,6 @@ import com.manager.schoolmateapi.onesignal.data.ComplaintData;
 import com.manager.schoolmateapi.users.enumerations.UserRole;
 import com.manager.schoolmateapi.users.models.User;
 import com.onesignal.client.ApiClient;
-import com.onesignal.client.ApiException;
 import com.onesignal.client.Configuration;
 import com.onesignal.client.auth.*;
 import com.onesignal.client.model.Notification;
@@ -125,8 +124,7 @@ public class OneSignalService {
 
     try {
       apiClient.createNotification(notification);
-    } catch (ApiException e) {
-      e.printStackTrace();
+    } catch (Exception ignored) {
     }
   }
 
@@ -146,8 +144,7 @@ public class OneSignalService {
 
     try {
       apiClient.createNotification(notification);
-    } catch (ApiException e) {
-      e.printStackTrace();
+    } catch (Exception ignored) {
     }
   }
 
@@ -165,8 +162,7 @@ public class OneSignalService {
 
     try {
       apiClient.createNotification(notification);
-    } catch (ApiException e) {
-      e.printStackTrace();
+    } catch (Exception ignored) {
     }
   }
 
@@ -181,33 +177,30 @@ public class OneSignalService {
   public void notifyComplainantAboutComplaintStatusChange(long complaintId, String complaintTitle,
       String complainantEmail, ComplaintStatus newStatus) {
 
-        Notification notification = createTargetedNotification(
-          "Your complaint is now " + newStatus.toString().toLowerCase(),
-          complaintTitle,
-          complainantEmail);
-  
-      notification.setData(new ComplaintData(complaintId));
-  
-      try {
-        apiClient.createNotification(notification);
-      } catch (ApiException e) {
-        e.printStackTrace();
-      }
+    Notification notification = createTargetedNotification(
+        "Your complaint is now " + newStatus.toString().toLowerCase(),
+        complaintTitle,
+        complainantEmail);
 
+    notification.setData(new ComplaintData(complaintId));
+
+    try {
+      apiClient.createNotification(notification);
+    } catch (Exception ignored) {
+    }
   }
 
   /**
    * Sends notification to a handler when the complaint is assigned to them
    * 
-   * @param complaintId       ID of the complaint
-   * @param complaintTitle    Title of the complainant
-   * @param handlerEmail      Email of the complainant
-   * @param principal         User who assigned the complaint
+   * @param complaintId    ID of the complaint
+   * @param complaintTitle Title of the complainant
+   * @param handlerEmail   Email of the complainant
+   * @param principal      User who assigned the complaint
    */
   public void notifyHandlerAboutNewComplaintAssigned(long complaintId, String complaintTitle, String handlerEmail,
-          User principal) {
+      User principal) {
 
-    
     Notification notification = createTargetedNotification(
         "A new complaint has been assigned to you by " + principal.getFullName(),
         complaintTitle,
@@ -217,11 +210,8 @@ public class OneSignalService {
 
     try {
       apiClient.createNotification(notification);
-    } catch (ApiException e) {
-      e.printStackTrace();
+    } catch (Exception ignored) {
     }
-
-    
   }
 
   /**
@@ -239,8 +229,7 @@ public class OneSignalService {
 
     try {
       apiClient.createNotification(notification);
-    } catch (ApiException e) {
-      e.printStackTrace();
+    } catch (Exception ignored) {
     }
   }
 }

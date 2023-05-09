@@ -2,7 +2,8 @@ package com.manager.schoolmateapi.alerts;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,10 @@ import com.manager.schoolmateapi.users.enumerations.UserRole;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
 import com.manager.schoolmateapi.utils.dto.PaginatedResponse;
-import net.bytebuddy.implementation.bytecode.ByteCodeAppender.Size;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,7 +50,7 @@ public class AlertsControllerTest {
         MyUserDetails testUser;
         MyUserDetails anotherTestUser;
 
-        @BeforeAll
+        @BeforeEach
         @Transactional
         public void setup() {
                 alertRepository.deleteAll();
@@ -82,6 +85,13 @@ public class AlertsControllerTest {
                 // save the test alert
                 alertRepository.save(alert);
 
+        }
+
+        @AfterEach
+        @Transactional
+        public void postTest() {
+                alertRepository.deleteAll();
+                userRepository.deleteAll();
         }
 
         @Test // test create an alert with all required fields
