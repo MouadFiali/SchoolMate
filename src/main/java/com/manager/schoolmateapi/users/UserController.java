@@ -2,6 +2,8 @@ package com.manager.schoolmateapi.users;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +27,7 @@ import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.users.models.User;
 import com.manager.schoolmateapi.users.services.UserService;
 import com.manager.schoolmateapi.utils.MessageResponse;
+import com.manager.schoolmateapi.utils.dto.PaginatedResponse;
 
 import jakarta.validation.Valid;
 
@@ -48,12 +51,55 @@ public class UserController {
 	}
 
 	@RequestMapping(value="/users", method = RequestMethod.GET)
-	ResponseEntity<?> getUserByEmail(@RequestParam(value = "email", required = false) String email){
+	ResponseEntity<?> getUsers(@RequestParam(value = "email", required = false) String email, 
+		Pageable pageable, @RequestParam(value = "search", required = false) String search,
+		@RequestParam(value = "role", required = false) UserRole role) {
 		if(email != null){
 			User user = userService.getUserByEmail(email);
 			return ResponseEntity.ok(user);
+		} else if(search != null){
+			Page<User> results;
+			if(role != null){
+				results = userService.searchUsers(search, role, pageable);
+			} else {
+				results = userService.searchUsers(search, pageable);
+			}
+			PaginatedResponse<User> response = PaginatedResponse.<User>builder()
+					.results(results.getContent())
+					.page(results.getNumber())
+					.totalPages(results.getTotalPages())
+					.count(results.getNumberOfElements())
+					.totalItems(results.getTotalElements())
+					.last(results.isLast())
+					.build();
+			return ResponseEntity.ok(response);
+		} else if(role != null){
+			Page<User> results = userService.getUsersByRole(role, pageable);
+
+			PaginatedResponse<User> response = PaginatedResponse.<User>builder()
+					.results(results.getContent())
+					.page(results.getNumber())
+					.totalPages(results.getTotalPages())
+					.count(results.getNumberOfElements())
+					.totalItems(results.getTotalElements())
+					.last(results.isLast())
+					.build();
+
+			return ResponseEntity.ok(response);
+
 		} else {
-			return ResponseEntity.ok(userService.getAllUsers());
+			Page<User> results = userService.getAllUsers(pageable);
+
+			PaginatedResponse<User> response = PaginatedResponse.<User>builder()
+					.results(results.getContent())
+					.page(results.getNumber())
+					.totalPages(results.getTotalPages())
+					.count(results.getNumberOfElements())
+					.totalItems(results.getTotalElements())
+					.last(results.isLast())
+					.build();
+
+			return ResponseEntity.ok(response);
 		}
 	}
 

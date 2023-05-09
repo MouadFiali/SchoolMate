@@ -80,6 +80,7 @@ public class User {
 	}
 
 	// Get full name
+	@JsonIgnore
 	public String getFullName() {
 		return this.firstName + " " + this.lastName;
 	}
