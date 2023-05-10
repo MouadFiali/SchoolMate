@@ -19,6 +19,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manager.schoolmateapi.SchoolMateApiApplication;
 import com.manager.schoolmateapi.users.dto.CreateUserDto;
@@ -42,6 +44,9 @@ public class UserControllerTest {
 	UserRepository userRepository;
 
     MyUserDetails testUser;
+
+    // Store the created user ids to delete them after the tests
+    ArrayList<Long> createdUsersIds = new ArrayList<>();
 
     @BeforeAll
     public void setUp() throws Exception {
@@ -77,6 +82,11 @@ public class UserControllerTest {
         userRepository.save(user);
         userRepository.save(user2);
         userRepository.save(user3);
+
+        // Add the created users ids to the list
+        createdUsersIds.add(user.getId());
+        createdUsersIds.add(user2.getId());
+        createdUsersIds.add(user3.getId());
 
         // Create a test user
         testUser = new MyUserDetails(user3);
@@ -240,7 +250,7 @@ public class UserControllerTest {
         User user = new User();
         user.setFirstName("John");
         user.setLastName("hamdoun");
-        user.setEmail("hamdoun@um5.ac.ma");
+        user.setEmail("hamdoun_johnathan@um5.ac.ma");
         user.setPassword("password");
         user.setRole(UserRole.STUDENT);
 
@@ -259,6 +269,9 @@ public class UserControllerTest {
             .andExpect(jsonPath("$.results", Matchers.hasSize(3)))
             .andExpect(jsonPath("$.results[*].role", Matchers.everyItem(Matchers.is("STUDENT"))))
             .andReturn();
+
+        // Delete the user
+        userRepository.delete(user);
     }
 
     @Test // Test get user by id
@@ -513,6 +526,49 @@ public class UserControllerTest {
 
     }
 
+    @Test // test /me endpoint after updating the user's details
+    public void testMe_shouldReturnUpdatedUser() throws Exception {
+
+        EditUserDto editUserDto = EditUserDto.builder()
+            .firstName("john le bon")
+            .lastName("doe le bien")
+            .build();
+
+        // create a user
+        User user = new User();
+        user.setFirstName("mike");
+        user.setLastName("ross");
+        user.setEmail("mike_ross@um5.ac.ma");
+        user.setPassword("password");
+        user.setRole(UserRole.STUDENT);
+
+        // save the user
+        userRepository.save(user);
+
+        MyUserDetails userDetails = new MyUserDetails(user);
+
+        // edit the user
+        mockMvc.perform(patch("/users/" + user.getId())
+            .with(user(userDetails))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(editUserDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.firstName", Matchers.is("john le bon")))
+            .andExpect(jsonPath("$.lastName", Matchers.is("doe le bien")))
+            .andReturn();
+
+        // Get the user's details after updating them
+        mockMvc.perform(get("/me")
+            .with(user(userDetails)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.firstName", Matchers.is("john le bon")))
+            .andExpect(jsonPath("$.lastName", Matchers.is("doe le bien")))
+            .andReturn();
+
+        // delete the user
+        userRepository.delete(user);
+    }
+
     @Test // test login with an invalid user
     public void testLogin_shouldReturnStatusBadRequest() throws Exception {
 
@@ -603,8 +659,14 @@ public class UserControllerTest {
 
     @AfterAll
     public void tearDown() throws Exception {
-        // Delete all users
-        userRepository.deleteAll();
+        // Delete the created users from the list we created
+        System.out.println("All users tests are done!");
+        System.out.println("Deleting the created users...");
+        for (Long userId : createdUsersIds) {
+            userRepository.deleteById(userId);
+            System.out.println("User with id " + userId + " deleted successfully");
+        }
+        System.out.println("Database is cleaned up!");
     }
     
 }

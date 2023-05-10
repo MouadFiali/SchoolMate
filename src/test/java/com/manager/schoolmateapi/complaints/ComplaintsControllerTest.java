@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -39,6 +40,7 @@ import com.manager.schoolmateapi.complaints.models.BuildingComplaint;
 import com.manager.schoolmateapi.complaints.models.FacilitiesComplaint;
 import com.manager.schoolmateapi.complaints.models.RoomComplaint;
 import com.manager.schoolmateapi.complaints.repositories.BuildingComplaintRepo;
+import com.manager.schoolmateapi.complaints.repositories.ComplaintRepository;
 import com.manager.schoolmateapi.complaints.repositories.FacilitiesComplaintRepo;
 import com.manager.schoolmateapi.complaints.repositories.RoomComplaintRepo;
 import com.manager.schoolmateapi.users.UserRepository;
@@ -66,7 +68,16 @@ public class ComplaintsControllerTest {
     RoomComplaintRepo roomComplaintRepo;
 
 	@Autowired
+	ComplaintRepository complaintRepository;
+
+	@Autowired
 	UserRepository userRepository;
+
+	// Store the user ids created for testing to delete them after testing
+	ArrayList<Long> userIds = new ArrayList<>();
+
+	// Store the complaint ids created for testing to delete them after testing
+	ArrayList<Long> complaintIds = new ArrayList<>();
 
 	MyUserDetails complainant;
 	MyUserDetails handler;
@@ -82,7 +93,7 @@ public class ComplaintsControllerTest {
 		userComplainant.setLastName("Smith");
 		userComplainant.setRole(UserRole.STUDENT);
 		userComplainant.setPassword("password");
-		userComplainant.setEmail("john.smith@gmail.com");
+		userComplainant.setEmail("john.smith@gmail2.com");
 
 		// Create a test user 2 (complaint handler)
 		User userHandler = new User();
@@ -90,7 +101,7 @@ public class ComplaintsControllerTest {
 		userHandler.setLastName("Doe");
 		userHandler.setRole(UserRole.ADEI);
 		userHandler.setPassword("password");
-		userHandler.setEmail("jane.doe@gmail.com");
+		userHandler.setEmail("jane.doe@gmail2.com");
 
 		// Create another test user (complainant 2)
 		User userComplainant2 = new User();
@@ -98,13 +109,19 @@ public class ComplaintsControllerTest {
 		userComplainant2.setLastName("Ross");
 		userComplainant2.setRole(UserRole.STUDENT);
 		userComplainant2.setPassword("password");
-		userComplainant2.setEmail("mike.ross@gmail.com");
+		userComplainant2.setEmail("mike.ross@gmail2.com");
 
 		// Save the test users
 		userComplainant = userRepository.save(userComplainant);
 		userHandler = userRepository.save(userHandler);
 		userComplainant2 = userRepository.save(userComplainant2);
 
+		// Store the user ids created for testing to delete them after testing
+		userIds.add(userComplainant.getId());
+		userIds.add(userHandler.getId());
+		userIds.add(userComplainant2.getId());
+
+		// Create MyUserDetails objects for the test users
 		complainant = new MyUserDetails(userComplainant);
 		handler = new MyUserDetails(userHandler);
 		complainant2 = new MyUserDetails(userComplainant2);
@@ -153,6 +170,12 @@ public class ComplaintsControllerTest {
 		roomComplaintRepo.save(roomComp);
 		facilitiesComplaintRepo.save(facilityComp);
 		facilitiesComplaintRepo.save(facilityComp2);
+
+		// Store the complaint ids created for testing to delete them after testing
+		complaintIds.add(buildingComp.getId());
+		complaintIds.add(roomComp.getId());
+		complaintIds.add(facilityComp.getId());
+		complaintIds.add(facilityComp2.getId());
 
 	}
 
@@ -605,6 +628,80 @@ public class ComplaintsControllerTest {
 		facilitiesComplaintRepo.delete(facilityComp2);
 	}
 
+	@Test // get complaints of all status of a specific type and handler
+	public void testGetComplaintsByStatusAndHandler_shouldReturnComplaints() throws Exception {
+		// create a handler 2
+		User handler2 = new User();
+		handler2.setFirstName("handler2");
+		handler2.setLastName("handler2");
+		handler2.setEmail("handler2@um5.ac.ma");
+		handler2.setPassword("handler2");
+		handler2.setRole(UserRole.ADEI);
+
+		handler2 = userRepository.save(handler2);
+
+		
+		BuildingComplaint buildingComp = new BuildingComplaint();
+		buildingComp.setBuilding("E");
+		buildingComp.setBuildingProb(BuildingProb.SHOWER);
+		buildingComp.setComplainant(complainant.getUser());
+		buildingComp.setDescription("The shower is not working");
+		buildingComp.setDate(new Date());
+		buildingComp.setHandler(handler.getUser());
+		buildingComp.setStatus(ComplaintStatus.ASSIGNED);
+
+		FacilitiesComplaint facilityComp3 = new FacilitiesComplaint();
+		facilityComp3.setFacilityType(FacilityType.CLASS);
+		facilityComp3.setClassName("A1");
+		facilityComp3.setDescription("The class is not working");
+		facilityComp3.setComplainant(complainant.getUser());
+		facilityComp3.setStatus(ComplaintStatus.REJECTED);
+		facilityComp3.setDate(new Date());
+		facilityComp3.setHandler(handler.getUser());
+
+		FacilitiesComplaint facilityComp2 = new FacilitiesComplaint();
+		facilityComp2.setFacilityType(FacilityType.CLASS);
+		facilityComp2.setClassName("Amphi 5");
+		facilityComp2.setDescription("The classroom is dead");
+		facilityComp2.setComplainant(complainant.getUser());
+		facilityComp2.setStatus(ComplaintStatus.RESOLVING);
+		facilityComp2.setDate(new Date());
+		facilityComp2.setHandler(handler2);
+
+		//save the complaints
+		buildingComp = buildingComplaintRepo.save(buildingComp);
+		facilityComp3 = facilitiesComplaintRepo.save(facilityComp3);
+		facilityComp2 = facilitiesComplaintRepo.save(facilityComp2);
+
+		int pageSize = 3;
+		int page = 0;
+
+		// We have 3 facilities complaints handled by handler 1
+		//get the complaints of a handler
+		mockMvc.perform(get("/complaints-by-status?type=facilities&handler=" + handler.getUser().getId())
+						.with(user(handler))
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(pageSize))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+						// 1 facilities complaints with status RESOLVING
+						.andExpect(jsonPath("$.results", Matchers.hasSize(3)))
+						//Check if all the complaints has the same user Ross
+						.andExpect(jsonPath("$.results[*].handler.lastName", Matchers.everyItem(Matchers.is("Doe"))))
+						// check the type of the complaints
+						.andExpect(jsonPath("$.results[*].dtype", Matchers.everyItem(Matchers.is("FacilitiesComplaint"))))
+						.andReturn();
+
+		// delete the complaints
+		buildingComplaintRepo.delete(buildingComp);
+		facilitiesComplaintRepo.delete(facilityComp3);
+		facilitiesComplaintRepo.delete(facilityComp2);
+
+		// delete the handler 2
+		userRepository.delete(handler2);
+	}
+
 	@Test //get all resolving complaints of a specific type
 	public void testGetBuildingComplaintsByStatusRESOLVING_shouldReturnBuildingComplaints() throws Exception {
 		// create a complaint 1 with handler 1 (RESOLVING)
@@ -1055,13 +1152,33 @@ public class ComplaintsControllerTest {
 		facilitiesComplaintRepo.deleteById(facilitiesComp.getId());
 	}
 
+	// Test getting complaint count by handler-----------------------------------------
+	@Test
+	public void testGetComplaintCountByHandler() throws Exception {
+		// get the complaint count by handler
+		mockMvc.perform(get("/complaints/count-by-handler/" + handler.getUser().getId())
+						.with(user(handler))
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$").value(3))
+						.andReturn();
+
+	}
+
 	// Clean up database after all tests
 	@AfterAll
 	public void cleanUp() {
-		roomComplaintRepo.deleteAll();
-		facilitiesComplaintRepo.deleteAll();
-		buildingComplaintRepo.deleteAll();
-		userRepository.deleteAll();
+		System.out.println("All complaints tests are done!");
+		System.out.println("Cleaning up database...");
+		for (Long complaintId: complaintIds) {
+			complaintRepository.deleteById(complaintId);
+			System.out.println("Complaint with id " + complaintId + " is deleted");
+		}
+		for (Long userId: userIds) {
+			userRepository.deleteById(userId);
+			System.out.println("User with id " + userId + " is deleted");
+		}
+		System.out.println("Database is cleaned up!");
 	}
 
 }
