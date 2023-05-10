@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -39,6 +40,7 @@ import com.manager.schoolmateapi.complaints.models.BuildingComplaint;
 import com.manager.schoolmateapi.complaints.models.FacilitiesComplaint;
 import com.manager.schoolmateapi.complaints.models.RoomComplaint;
 import com.manager.schoolmateapi.complaints.repositories.BuildingComplaintRepo;
+import com.manager.schoolmateapi.complaints.repositories.ComplaintRepository;
 import com.manager.schoolmateapi.complaints.repositories.FacilitiesComplaintRepo;
 import com.manager.schoolmateapi.complaints.repositories.RoomComplaintRepo;
 import com.manager.schoolmateapi.users.UserRepository;
@@ -66,7 +68,16 @@ public class ComplaintsControllerTest {
     RoomComplaintRepo roomComplaintRepo;
 
 	@Autowired
+	ComplaintRepository complaintRepository;
+
+	@Autowired
 	UserRepository userRepository;
+
+	// Store the user ids created for testing to delete them after testing
+	ArrayList<Long> userIds = new ArrayList<>();
+
+	// Store the complaint ids created for testing to delete them after testing
+	ArrayList<Long> complaintIds = new ArrayList<>();
 
 	MyUserDetails complainant;
 	MyUserDetails handler;
@@ -82,7 +93,7 @@ public class ComplaintsControllerTest {
 		userComplainant.setLastName("Smith");
 		userComplainant.setRole(UserRole.STUDENT);
 		userComplainant.setPassword("password");
-		userComplainant.setEmail("john.smith@gmail.com");
+		userComplainant.setEmail("john.smith@gmail2.com");
 
 		// Create a test user 2 (complaint handler)
 		User userHandler = new User();
@@ -90,7 +101,7 @@ public class ComplaintsControllerTest {
 		userHandler.setLastName("Doe");
 		userHandler.setRole(UserRole.ADEI);
 		userHandler.setPassword("password");
-		userHandler.setEmail("jane.doe@gmail.com");
+		userHandler.setEmail("jane.doe@gmail2.com");
 
 		// Create another test user (complainant 2)
 		User userComplainant2 = new User();
@@ -98,13 +109,19 @@ public class ComplaintsControllerTest {
 		userComplainant2.setLastName("Ross");
 		userComplainant2.setRole(UserRole.STUDENT);
 		userComplainant2.setPassword("password");
-		userComplainant2.setEmail("mike.ross@gmail.com");
+		userComplainant2.setEmail("mike.ross@gmail2.com");
 
 		// Save the test users
 		userComplainant = userRepository.save(userComplainant);
 		userHandler = userRepository.save(userHandler);
 		userComplainant2 = userRepository.save(userComplainant2);
 
+		// Store the user ids created for testing to delete them after testing
+		userIds.add(userComplainant.getId());
+		userIds.add(userHandler.getId());
+		userIds.add(userComplainant2.getId());
+
+		// Create MyUserDetails objects for the test users
 		complainant = new MyUserDetails(userComplainant);
 		handler = new MyUserDetails(userHandler);
 		complainant2 = new MyUserDetails(userComplainant2);
@@ -153,6 +170,12 @@ public class ComplaintsControllerTest {
 		roomComplaintRepo.save(roomComp);
 		facilitiesComplaintRepo.save(facilityComp);
 		facilitiesComplaintRepo.save(facilityComp2);
+
+		// Store the complaint ids created for testing to delete them after testing
+		complaintIds.add(buildingComp.getId());
+		complaintIds.add(roomComp.getId());
+		complaintIds.add(facilityComp.getId());
+		complaintIds.add(facilityComp2.getId());
 
 	}
 
@@ -1145,10 +1168,17 @@ public class ComplaintsControllerTest {
 	// Clean up database after all tests
 	@AfterAll
 	public void cleanUp() {
-		roomComplaintRepo.deleteAll();
-		facilitiesComplaintRepo.deleteAll();
-		buildingComplaintRepo.deleteAll();
-		userRepository.deleteAll();
+		System.out.println("All complaints tests are done!");
+		System.out.println("Cleaning up database...");
+		for (Long complaintId: complaintIds) {
+			complaintRepository.deleteById(complaintId);
+			System.out.println("Complaint with id " + complaintId + " is deleted");
+		}
+		for (Long userId: userIds) {
+			userRepository.deleteById(userId);
+			System.out.println("User with id " + userId + " is deleted");
+		}
+		System.out.println("Database is cleaned up!");
 	}
 
 }
