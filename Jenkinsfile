@@ -38,6 +38,15 @@ node {
 
     stage('Deploy Docker image') {
       echo "Docker Image Tag Name: ${dockerImageTag}"
+      echo "Logging in to Docker Hub..."
+      
+      withCredentials([
+        usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')
+      ]) {        
+        sh('docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD')
+      }  
+      
+      echo "Pushing image..."
       sh "docker push ${dockerImageTag}"
     }
 
