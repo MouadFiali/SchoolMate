@@ -1,5 +1,4 @@
 package com.manager.schoolmateapi.alerts.dto;
-import org.springframework.data.geo.Point;
 import java.util.List;
 import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;

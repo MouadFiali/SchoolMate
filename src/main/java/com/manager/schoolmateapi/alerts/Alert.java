@@ -1,8 +1,10 @@
 package com.manager.schoolmateapi.alerts;
 
-import org.springframework.data.geo.Point;
+import java.util.Date;
+import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 import com.manager.schoolmateapi.users.models.User;
@@ -35,7 +37,6 @@ public class Alert {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore
     private User user;
 
     @Column(nullable = false)
@@ -48,8 +49,12 @@ public class Alert {
     @Enumerated(EnumType.ORDINAL)
     private AlertType type;
 
+    @CreationTimestamp
     @Column(nullable = false)
-    private Point coordinates;
+    private Date date;
+
+    @Column(nullable = false)
+    private List<Double> coordinates;
 
     @Column(nullable = false)
     private AlertStatus status = PENDING ;
