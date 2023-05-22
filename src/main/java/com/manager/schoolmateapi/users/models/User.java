@@ -78,4 +78,10 @@ public class User {
 	public void setPassword(String password) {
 		this.password = BCrypt.hashpw(password, BCrypt.gensalt());
 	}
+
+	// Get full name
+	@JsonIgnore
+	public String getFullName() {
+		return this.firstName + " " + this.lastName;
+	}
 }

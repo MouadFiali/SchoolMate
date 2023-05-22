@@ -73,7 +73,7 @@ public class SecurityConfiguration {
                                     // by default, the response status code is 200 (OK)
                                     response.setStatus(HttpStatus.BAD_REQUEST.value());
                                     response.getWriter().write("{\"message\": \"Incorrect username or password\"}");
-                                   } else {
+                                } else {
                                     // set status code to 500 (Internal Server Error) for other exceptions
                                     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
                                     response.getWriter().write("{\"message\": \"Authentication failed\"}");

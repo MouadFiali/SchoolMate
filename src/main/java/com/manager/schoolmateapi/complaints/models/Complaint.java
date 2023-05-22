@@ -1,7 +1,10 @@
 package com.manager.schoolmateapi.complaints.models;
 
-import java.time.LocalDate;
+import java.util.Date;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.manager.schoolmateapi.complaints.enumerations.ComplaintStatus;
 import com.manager.schoolmateapi.users.models.User;
 
@@ -39,8 +42,9 @@ public class Complaint {
     @Column(name = "status", nullable = false)
     private ComplaintStatus status;
 
+    @CreationTimestamp
     @Column(name = "date", nullable = false)
-    private LocalDate date;
+    private Date date;
 
     @ManyToOne
     @JoinColumn(name = "complainant")
@@ -50,4 +54,21 @@ public class Complaint {
     @JoinColumn(name = "handler")
     private User handler;
 
+    // Show the dtype (that is set automatically by Hibernate)
+    @Column(insertable = false, updatable = false)
+    private String dtype;
+
+    @JsonIgnore
+    public String getTitle(){
+        String title = this.complainant.getFullName() + " • ";
+        if (this.dtype.equals(RoomComplaint.class.getSimpleName())) {
+            title += "Room";
+        } else if (this.dtype.equals(BuildingComplaint.class.getSimpleName())) {
+            title += "Building";
+        } else if (this.dtype.equals(FacilitiesComplaint.class.getSimpleName())) {
+            title += "Facilities";
+        }
+        title += " Complaint";
+        return title;
+    }
 }

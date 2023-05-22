@@ -32,6 +32,7 @@ public abstract class ComplaintDtoMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "complainant", ignore = true)
     @Mapping(target = "handler", ignore = true)
+    @Mapping(target = "dtype", ignore = true)
     public abstract RoomComplaint createRoomComplaintDtoToRoomComplaint(CreateRoomComplaintDto createRoomComplaintDto);
     
     @Mapping(target = "id", ignore = true)
@@ -39,6 +40,7 @@ public abstract class ComplaintDtoMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "complainant", ignore = true)
     @Mapping(target = "handler", ignore = true)
+    @Mapping(target = "dtype", ignore = true)
     public abstract BuildingComplaint createBuildingComplaintDtoToBuildingComplaint(CreateBuildingComplaintDto createBuildingComplaintDto);
 
     @Mapping(target = "id", ignore = true)
@@ -46,6 +48,7 @@ public abstract class ComplaintDtoMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "complainant", ignore = true)
     @Mapping(target = "handler", ignore = true)
+    @Mapping(target = "dtype", ignore = true)
     public abstract FacilitiesComplaint createFacilityComplaintDtoToFacilityComplaint(CreateFacilityComplaintDto createFacilityComplaintDto);
     
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -54,7 +57,8 @@ public abstract class ComplaintDtoMapper {
     @Mapping(target = "description", ignore = true)
     @Mapping(target = "complainant", ignore = true)
     @Mapping(source = "handlerId", target = "handler", qualifiedByName = "handlerIdToHandlerUser")
-    public abstract Complaint updateComplaintStatusAndHandlerDtoToComplaint(EditComplaintStatusAndHandlerDto updateComplaintStatusDto, @MappingTarget Complaint complaint);
+    @Mapping(target = "dtype", ignore = true)
+    public abstract void updateComplaintStatusAndHandlerDtoToComplaint(EditComplaintStatusAndHandlerDto updateComplaintStatusDto, @MappingTarget Complaint complaint);
 
     @Named("handlerIdToHandlerUser")
     public User handlerIdToHandlerUser(Long handlerId) {
