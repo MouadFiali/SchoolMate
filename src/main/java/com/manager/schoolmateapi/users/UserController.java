@@ -114,15 +114,14 @@ public class UserController {
 		@AuthenticationPrincipal MyUserDetails userDetails){
 			// if the user is editing their own profile and they are not changing their role
 			if(userDetails.getUser().getId().equals(id) && editUserDto.getRole() == null){
+				
 				User user = userService.editUser(id, editUserDto);
-				userDetails.refresh(user);
 				return user;
 			} else if (userDetails.getUser().getRole() == UserRole.MODERATOR && editUserDto.getRole() != null){
 				if(editUserDto.getEmail()!=null || editUserDto.getFirstName()!=null || editUserDto.getLastName()!=null){
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only change the role of the user");
 				}
 				User user = userService.editUser(id, editUserDto);
-				userDetails.refresh(user);
 				return user;
 			} else {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to edit this user");
@@ -133,14 +132,13 @@ public class UserController {
 	@GetMapping("/me")
 	User getPrincipal(){
 		MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		return userDetails.getUser();
+		return userService.getUser(userDetails.getUser().getId());
 	}
 
 	@PatchMapping("/me/reset-password")
 	MessageResponse editPassword(
 		@Valid @RequestBody EditPasswordDto editPasswordDto, @AuthenticationPrincipal MyUserDetails userDetails){
 			userService.editPassword(editPasswordDto);
-			userDetails.refresh(userDetails.getUser());
 			return new MessageResponse("Password changed successfully!");
 	}
 
