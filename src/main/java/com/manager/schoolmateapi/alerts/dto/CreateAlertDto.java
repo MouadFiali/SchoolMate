@@ -1,8 +1,7 @@
 package com.manager.schoolmateapi.alerts.dto;
+
 import java.util.List;
 
-
-import com.manager.schoolmateapi.alerts.enumerations.AlertStatus;
 import com.manager.schoolmateapi.alerts.enumerations.AlertType;
 
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
 
 @Data
 @SuperBuilder
@@ -28,6 +26,4 @@ public class CreateAlertDto {
 
     @NotNull(message = "The coordinates are necessary")
     private List<Double> coordinates;
-
-
 }

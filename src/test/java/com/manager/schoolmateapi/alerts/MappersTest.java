@@ -22,26 +22,24 @@ public class MappersTest {
 
     @Test
     public void testCreateAlertFromDto_shouldReturnAlertSuccesfully() {
-        CreateAlertDto createAlertDto = new CreateAlertDto()
+        CreateAlertDto createAlertDto = CreateAlertDto
                 .builder()
                 .title("title")
                 .description("description")
                 .type(AlertType.ROBBERY)
                 .coordinates(List.of(1.0, 1.0))
-               // .status(AlertStatus.PENDING)
                 .build();
         Alert alert = alertMapper.createDtoToAlert(createAlertDto);
         assert (alert.getTitle().equals(createAlertDto.getTitle()));
         assert (alert.getDescription().equals(createAlertDto.getDescription()));
         assert (alert.getType().equals(createAlertDto.getType()));
         assertThat(listToPoint(alert.getCoordinates()), Matchers.is(listToPoint(createAlertDto.getCoordinates())));
-     
 
     }
 
     @Test
     public void testEditAlertFromDto_shouldReturnChagedAlert() {
-        EditAlertDto editAlertDto = new EditAlertDto()
+        EditAlertDto editAlertDto = EditAlertDto
                 .builder()
                 .title("title")
                 .description("description")

@@ -19,3 +19,4 @@ public class PaginatedResponse<T> {
   private long totalItems;
   private boolean last;
 }
+
