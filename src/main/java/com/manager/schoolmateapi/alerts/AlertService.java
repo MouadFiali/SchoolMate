@@ -29,8 +29,8 @@ public class AlertService {
    @Autowired
    private AlertRepository alertRepository;
 
-   public Alert getAlertById(Long id, User user) {
-      return alertRepository.findByIdAndUser(id, user).orElseThrow(NOT_FOUND_HANDLER);
+   public Alert getAlertById(Long id) {
+      return alertRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER);
    }
 
    @Transactional
@@ -86,8 +86,8 @@ public class AlertService {
 
    }
 
-   public Alert confirmUserAlert(Long id, User user) {
-      Alert alert = alertRepository.findByIdAndUser(id, user).orElseThrow(NOT_FOUND_HANDLER);
+   public Alert confirmUserAlert(Long id) {
+      Alert alert = alertRepository.findById(id).orElseThrow(NOT_FOUND_HANDLER);
 
       if (alert.getStatus() == AlertStatus.CONFIRMED) {
          throw new ResponseStatusException(HttpStatus.CONFLICT);

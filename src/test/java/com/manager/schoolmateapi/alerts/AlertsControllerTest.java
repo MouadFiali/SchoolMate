@@ -79,7 +79,7 @@ public class AlertsControllerTest {
                 alert.setTitle("test alert");
                 alert.setDescription("test alert description");
                 alert.setType(AlertType.DANGER);
-                alert.setCoordinates(new Point(1, 1));
+                alert.setCoordinates(List.of(1.0, 1.0));
                 alert.setStatus(AlertStatus.PENDING);
                 alert.setUser(testUser.getUser());
                 // save the test alert
@@ -140,13 +140,6 @@ public class AlertsControllerTest {
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(alertDto)))
                                 .andExpect(status().isOk())
-                                // .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                                // .andExpect(jsonPath("$[0].title").value("test alert"))
-                                // .andExpect(jsonPath("$[0].description").value("test alert description"))
-                                // .andExpect(jsonPath("$[0].type").value("DANGER"))
-                                // .andExpect(jsonPath("$[0].coordinates.x").value(1.0))
-                                // .andExpect(jsonPath("$[0].coordinates.y").value(1.0))
-                                // .andExpect(jsonPath("$[0].status").value("PENDING"))
                                 .andReturn()
                                 .getResponse()
                                 .getContentAsString();
@@ -167,7 +160,7 @@ public class AlertsControllerTest {
                 alert.setTitle("test alert");
                 alert.setDescription("test alert description");
                 alert.setType(AlertType.DANGER);
-                alert.setCoordinates(new Point(1, 1));
+                alert.setCoordinates(List.of(1.0, 1.0));
                 alert.setStatus(AlertStatus.PENDING);
                 alert.setUser(testUser.getUser());
                 // save the test alert
@@ -182,8 +175,8 @@ public class AlertsControllerTest {
                                 .andExpect(jsonPath("$.title").value(alert.getTitle()))
                                 .andExpect(jsonPath("$.description").value(alert.getDescription()))
                                 .andExpect(jsonPath("$.type").value(alert.getType().toString()))
-                                .andExpect(jsonPath("$.coordinates.x").value(alert.getCoordinates().getX()))
-                                .andExpect(jsonPath("$.coordinates.y").value(alert.getCoordinates().getY()))
+                                .andExpect(jsonPath("$.coordinates.x").value(alert.getCoordinates().get(0)))
+                                .andExpect(jsonPath("$.coordinates.y").value(alert.getCoordinates().get(1)))
                                 .andExpect(jsonPath("$.status").value(alert.getStatus().toString()))
                                 .andReturn();
 
@@ -209,7 +202,7 @@ public class AlertsControllerTest {
                 alert.setTitle("test alert");
                 alert.setDescription("test alert description");
                 alert.setType(AlertType.DANGER);
-                alert.setCoordinates(new Point(1, 1));
+                alert.setCoordinates(List.of(1.0, 1.0));
                 alert.setStatus(AlertStatus.PENDING);
                 alert.setUser(testUser.getUser());
                 // save the test alert
@@ -251,7 +244,7 @@ public class AlertsControllerTest {
                 alert.setTitle("test alert");
                 alert.setDescription("test alert description");
                 alert.setType(AlertType.DANGER);
-                alert.setCoordinates(new Point(1, 1));
+                alert.setCoordinates(List.of(1.0, 1.0));
                 alert.setStatus(AlertStatus.PENDING);
                 alert.setUser(testUser.getUser());
                 alertRepository.save(alert);
@@ -271,7 +264,7 @@ public class AlertsControllerTest {
                 alert.setTitle("test alert");
                 alert.setDescription("test alert description");
                 alert.setType(AlertType.DANGER);
-                alert.setCoordinates(new Point(1, 1));
+                alert.setCoordinates(List.of(1.0, 1.0));
                 alert.setStatus(AlertStatus.PENDING);
                 alert.setUser(testUser.getUser());
                 alertRepository.save(alert);
@@ -301,7 +294,7 @@ public class AlertsControllerTest {
                 alert.setTitle("test alert");
                 alert.setDescription("test alert description");
                 alert.setType(AlertType.DANGER);
-                alert.setCoordinates(new Point(1, 1));
+                alert.setCoordinates(List.of(1.0, 1.0));
                 alert.setStatus(AlertStatus.PENDING);
                 alert.setUser(testUser.getUser());
                 alertRepository.save(alert);
