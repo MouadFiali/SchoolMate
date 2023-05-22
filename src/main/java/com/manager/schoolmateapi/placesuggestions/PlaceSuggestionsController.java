@@ -1,6 +1,8 @@
 package com.manager.schoolmateapi.placesuggestions;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -9,13 +11,16 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.manager.schoolmateapi.placesuggestions.dto.CreatePlaceSuggestionDto;
 import com.manager.schoolmateapi.placesuggestions.dto.EditPlaceSuggestionDto;
+import com.manager.schoolmateapi.placesuggestions.enumerations.PlaceSuggestionType;
 import com.manager.schoolmateapi.users.models.MyUserDetails;
 import com.manager.schoolmateapi.utils.MessageResponse;
+import com.manager.schoolmateapi.utils.dto.PaginatedResponse;
 
 import jakarta.validation.Valid;
 
@@ -25,9 +30,21 @@ public class PlaceSuggestionsController {
     PlaceSuggestionsService placesuggestionsService;
 
     @GetMapping(value = "/placesuggestions")
-    public Iterable<PlaceSuggestions> getAllPlaceSuggestions() {
-        return placesuggestionsService.getAllPlaceSuggestions();
-    }
+        public PaginatedResponse<PlaceSuggestions> getAllPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") PlaceSuggestionType type) {
+            
+            Page<PlaceSuggestions> results = placesuggestionsService.getAllPlaceSuggestions(pageable);
+            
+            PaginatedResponse<PlaceSuggestions> response = PaginatedResponse.<PlaceSuggestions>builder()
+            .results(results.getContent())
+            .page(results.getNumber())
+            .totalPages(results.getTotalPages())
+            .count(results.getNumberOfElements())
+            .totalItems(results.getTotalElements())
+            .last(results.isLast())
+            .build();
+    
+            return response;
+        }  
 
     @PostMapping("/placesuggestions")
     @ResponseStatus(HttpStatus.CREATED)
@@ -37,25 +54,54 @@ public class PlaceSuggestionsController {
 
     }
 
+    @GetMapping(value="/placesuggestions/user/me")
+    public PaginatedResponse<PlaceSuggestions> getMyUserPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") PlaceSuggestionType type,@AuthenticationPrincipal MyUserDetails userDetails ){
+        Page<PlaceSuggestions> results = placesuggestionsService.getUserPlaceSuggestions(userDetails.getUser(), pageable);
+
+        PaginatedResponse<PlaceSuggestions> response = PaginatedResponse.<PlaceSuggestions>builder()
+        .results(results.getContent())
+        .page(results.getNumber())
+        .totalPages(results.getTotalPages())
+        .count(results.getNumberOfElements())
+        .totalItems(results.getTotalElements())
+        .last(results.isLast())
+        .build();
+
+        return response;
+    }
+
+    @GetMapping(value = "/placesuggestions/user/{id}")
+    public PaginatedResponse<PlaceSuggestions> getUserPlaceSuggestions(Pageable pageable, @RequestParam(required = false, value="type") PlaceSuggestionType type, @PathVariable("id") Long id){
+        Page<PlaceSuggestions> results = placesuggestionsService.getUserPlaceSuggestionsById(id, pageable);
+
+        PaginatedResponse<PlaceSuggestions> response = PaginatedResponse.<PlaceSuggestions>builder()
+        .results(results.getContent())
+        .page(results.getNumber())
+        .totalPages(results.getTotalPages())
+        .count(results.getNumberOfElements())
+        .totalItems(results.getTotalElements())
+        .last(results.isLast())
+        .build();
+
+        return response;
+    }
+
     @GetMapping(value = "/placesuggestions/{id}")
-    PlaceSuggestions getUserPlaceSuggestions(@AuthenticationPrincipal MyUserDetails userDetails,
-            @PathVariable("id") Long id) {
-        return placesuggestionsService.getSuggestionById(id, userDetails.getUser());
+    public PlaceSuggestions getPlaceSuggestion(@PathVariable("id") Long id){
+        return placesuggestionsService.getSuggestionById(id);
     }
 
     @PatchMapping("/placesuggestions/{id}")
-    PlaceSuggestions updateUserPlaceSuggestion(
-            @AuthenticationPrincipal MyUserDetails userDetails,
+    PlaceSuggestions updatePlaceSuggestion(
             @PathVariable("id") Long id,
             @Valid @RequestBody EditPlaceSuggestionDto editPlaceSuggestionDto) {
-        return placesuggestionsService.editUserPlaceSuggestion(id, editPlaceSuggestionDto, userDetails.getUser());
+        return placesuggestionsService.editUserPlaceSuggestion(id, editPlaceSuggestionDto);
     }
 
     @DeleteMapping("/placesuggestions/{id}")
-    MessageResponse deleteUserPlaceSuggestions(@AuthenticationPrincipal MyUserDetails userDetails,
-            @PathVariable("id") Long id) {
-        placesuggestionsService.deleteUserPlaceSuggestions(id, userDetails.getUser());
-        return new MessageResponse("Place Suggestions deleted successfully");
+    MessageResponse deleteUserPlaceSuggestion(@PathVariable("id") Long id) {
+        placesuggestionsService.deletePlaceSuggestion(id);
+        return new MessageResponse("Place Suggestion deleted successfully");
     }
 
 }

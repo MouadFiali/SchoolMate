@@ -77,7 +77,7 @@ public class SecurityConfiguration {
                                     // set status code to 500 (Internal Server Error) for other exceptions
                                     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
                                     response.getWriter().write("{\"message\": \"Authentication failed\"}");
-                                }
+                                  }
                             })
                             .permitAll());
 

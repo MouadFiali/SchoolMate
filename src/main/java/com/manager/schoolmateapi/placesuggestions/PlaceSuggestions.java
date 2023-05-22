@@ -1,5 +1,8 @@
 package com.manager.schoolmateapi.placesuggestions;
 
+import java.util.Date;
+
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.geo.Point;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,5 +47,9 @@ public class PlaceSuggestions {
 
     @Column(nullable = false)
     private Point coordinates;
+
+    @CreationTimestamp
+    @Column(name = "date", nullable = false)
+    private Date date;
 
 }
