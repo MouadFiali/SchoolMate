@@ -61,5 +61,9 @@ public class MyUserDetails implements UserDetails {
     public boolean isEnabled() {
         return user.isActive();
     }
+
+    public void refresh(User user){
+        this.user = user;
+    }
     
 }

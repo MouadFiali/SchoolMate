@@ -26,4 +26,7 @@ public class EditUserDto {
 
     @Nullable
     private UserRole role;
+
+    @Nullable
+    private boolean isActive;
 }
