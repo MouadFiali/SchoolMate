@@ -34,3 +34,4 @@ build/
 
 ### Environment properties ###
 env.properties
+src/main/java/com/manager/schoolmateapi/DbInit.java
