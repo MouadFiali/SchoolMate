@@ -1,8 +1,10 @@
 package com.manager.schoolmateapi.placesuggestions;
 
+import java.util.Date;
+
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.geo.Point;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.manager.schoolmateapi.placesuggestions.enumerations.PlaceSuggestionType;
 import com.manager.schoolmateapi.users.models.User;
 import jakarta.persistence.Column;
@@ -32,7 +34,6 @@ public class PlaceSuggestions {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore
     private User user;
 
     @Column(nullable = false)
@@ -44,5 +45,9 @@ public class PlaceSuggestions {
 
     @Column(nullable = false)
     private Point coordinates;
+
+    @CreationTimestamp
+    @Column(name = "date", nullable = false)
+    private Date date;
 
 }

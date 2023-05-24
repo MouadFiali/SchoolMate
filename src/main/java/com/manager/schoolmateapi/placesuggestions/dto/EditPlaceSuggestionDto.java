@@ -1,6 +1,6 @@
 package com.manager.schoolmateapi.placesuggestions.dto;
 
-import org.springframework.data.geo.Point;
+import java.util.List;
 
 import com.manager.schoolmateapi.placesuggestions.enumerations.PlaceSuggestionType;
 
@@ -22,5 +22,5 @@ public class EditPlaceSuggestionDto {
     private PlaceSuggestionType suggestiontype;
 
     @Nullable
-    private Point coordinates;
+    private List<Double> coordinates;
 }
