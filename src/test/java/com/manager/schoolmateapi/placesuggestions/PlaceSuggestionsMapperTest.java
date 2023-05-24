@@ -31,27 +31,29 @@ public class PlaceSuggestionsMapperTest {
         PlaceSuggestions suggestion = suggestionMapper.createDTOtoPlaceSuggestion(createPlaceSuggetionDto);
         assert (suggestion.getDescription().equals(createPlaceSuggetionDto.getDescription()));
         assert (suggestion.getSuggestiontype().equals(createPlaceSuggetionDto.getSuggestiontype()));
-        assertThat(suggestion.getCoordinates(), Matchers.is(PlaceSuggestionsMapper.listToPoint(createPlaceSuggetionDto.getCoordinates())));
+        assertThat(suggestion.getCoordinates(),
+                Matchers.is(PlaceSuggestionsMapper.listToPoint(createPlaceSuggetionDto.getCoordinates())));
     }
 
     @Test
-    public void testEditPlaceSuggestionFromDto_shouldReturnChangedPlaceSuggestion(){
+    public void testEditPlaceSuggestionFromDto_shouldReturnChangedPlaceSuggestion() {
         EditPlaceSuggestionDto editPlaceSuggestionDto = EditPlaceSuggestionDto
-        .builder()
-        .description("description")
-        .suggestiontype(PlaceSuggestionType.Entertainment)
-        .coordinates(List.of(1.0, 1.0))
-        .build();
+                .builder()
+                .description("description")
+                .suggestiontype(PlaceSuggestionType.Entertainment)
+                .coordinates(List.of(1.0, 1.0))
+                .build();
 
-        //create the old suggestion
+        // create the old suggestion
         PlaceSuggestions suggestion = new PlaceSuggestions();
         suggestion.setDescription("old description");
         suggestion.setSuggestiontype(PlaceSuggestionType.StudyPlace);
         suggestion.setCoordinates(new Point(2, 2));
         suggestionMapper.updatePlaceSuggestionFromDto(editPlaceSuggestionDto, suggestion);
-        assert(suggestion.getDescription().equals(editPlaceSuggestionDto.getDescription()));
-        assert(suggestion.getSuggestiontype().equals(editPlaceSuggestionDto.getSuggestiontype()));
-        assertThat(suggestion.getCoordinates(),Matchers.is(editPlaceSuggestionDto.getCoordinates()));
+        assert (suggestion.getDescription().equals(editPlaceSuggestionDto.getDescription()));
+        assert (suggestion.getSuggestiontype().equals(editPlaceSuggestionDto.getSuggestiontype()));
+        assertThat(suggestion.getCoordinates().getX(), Matchers.is(editPlaceSuggestionDto.getCoordinates().get(0)));
+        assertThat(suggestion.getCoordinates().getY(), Matchers.is(editPlaceSuggestionDto.getCoordinates().get(1)));
 
-    }    
+    }
 }
