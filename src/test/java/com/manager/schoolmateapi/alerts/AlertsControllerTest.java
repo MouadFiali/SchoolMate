@@ -112,8 +112,8 @@ public class AlertsControllerTest {
                                 .andExpect(jsonPath("$.title").value("test alert"))
                                 .andExpect(jsonPath("$.description").value("test alert description"))
                                 .andExpect(jsonPath("$.type").value("DANGER"))
-                                .andExpect(jsonPath("$.coordinates.x").value(1.0))
-                                .andExpect(jsonPath("$.coordinates.y").value(1.0))
+                                .andExpect(jsonPath("$.coordinates[0]").value(1.0))
+                                .andExpect(jsonPath("$.coordinates[1]").value(1.0))
                                 .andExpect(jsonPath("$.status").value("PENDING"))
                                 .andReturn().getResponse().getContentAsString();
                 // Delete the alert after the test
@@ -175,8 +175,8 @@ public class AlertsControllerTest {
                                 .andExpect(jsonPath("$.title").value(alert.getTitle()))
                                 .andExpect(jsonPath("$.description").value(alert.getDescription()))
                                 .andExpect(jsonPath("$.type").value(alert.getType().toString()))
-                                .andExpect(jsonPath("$.coordinates.x").value(alert.getCoordinates().get(0)))
-                                .andExpect(jsonPath("$.coordinates.y").value(alert.getCoordinates().get(1)))
+                                .andExpect(jsonPath("$.coordinates[0]").value(alert.getCoordinates().get(0)))
+                                .andExpect(jsonPath("$.coordinates[1]").value(alert.getCoordinates().get(1)))
                                 .andExpect(jsonPath("$.status").value(alert.getStatus().toString()))
                                 .andReturn();
 
@@ -228,8 +228,8 @@ public class AlertsControllerTest {
                                 .andExpect(jsonPath("$.title").value("updated title"))
                                 .andExpect(jsonPath("$.description").value("updated description"))
                                 .andExpect(jsonPath("$.type").value("WARNING"))
-                                .andExpect(jsonPath("$.coordinates.x").value(2.0))
-                                .andExpect(jsonPath("$.coordinates.x").value(2.0))
+                                .andExpect(jsonPath("$.coordinates[0]").value(2.0))
+                                .andExpect(jsonPath("$.coordinates[1]").value(2.0))
                                 .andExpect(jsonPath("$.status").value("PENDING"))// check why the other fields are not
                                                                                  // updated
                                 .andReturn();
@@ -277,8 +277,8 @@ public class AlertsControllerTest {
                                 .andExpect(jsonPath("$.title").value("test alert"))
                                 .andExpect(jsonPath("$.description").value("test alert description"))
                                 .andExpect(jsonPath("$.type").value("DANGER"))
-                                .andExpect(jsonPath("$.coordinates.x").value(1.0))
-                                .andExpect(jsonPath("$.coordinates.y").value(1.0))
+                                .andExpect(jsonPath("$.coordinates[0]").value(1.0))
+                                .andExpect(jsonPath("$.coordinates[1]").value(1.0))
                                 .andExpect(jsonPath("$.status").value("CONFIRMED"))
                                 .andReturn().getResponse().getContentAsString();
 

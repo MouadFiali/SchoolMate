@@ -78,11 +78,11 @@ public class PlaceSuggestionsControllerTest {
         }
 
         @AfterAll
-        public void cleanup(){
-                userRepository.deleteAll();
+        public void cleanup() {
                 placeSuggestionRepository.deleteAll();
+                userRepository.deleteAll();
         }
- 
+
         @Test // Testing the creation of a Place Suggestion with all of the required fields
         public void testCreatePlaceSuggestion_shouldReturnCreatedPlaceSuggestion() throws Exception {
                 CreatePlaceSuggestionDto placeSuggestionDto = CreatePlaceSuggestionDto.builder()
@@ -218,7 +218,7 @@ public class PlaceSuggestionsControllerTest {
                 placeSuggestionRepository.save(suggestion);
                 placeSuggestionRepository.save(suggestion2);
 
-                mockMvc.perform(get("/placesuggestions/user/"+testUser1.getUser().getId())
+                mockMvc.perform(get("/placesuggestions/user/" + testUser1.getUser().getId())
                                 .with(user(testUser1))
                                 .contentType("application/json"))
                                 .andExpect(status().isOk())
